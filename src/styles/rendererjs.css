@@ -1,0 +1,87 @@
+*{
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+/*================================================= RENDERER DIV ================================================== */
+.view-renderer{
+  border: 1px solid #DDE8BB;
+  height: 100%;
+  width: 100%;
+}
+
+.view-renderer-titlebar{
+  position: relative;
+  margin: 0;
+  cursor: move;
+  padding: 0 10px;
+  height: 30px;
+}
+
+.view-renderer-titlebar-title{
+  float: left;
+  line-height: 30px;
+  vertical-align: middle;
+  white-space: nowrap;
+  width: -webkit-calc(100% - 40px);
+  width: -moz-calc(100% - 40px);
+  width: calc(100% - 40px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #633A05;
+  font-size: 12px;
+  padding: 0;
+}
+
+.view-renderer-titlebar-buttonpane{
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  margin-top: -10px;
+  height: 18px;
+}
+
+.view-renderer-titlebar-buttonpane button{
+  position: relative;
+  float: right;
+  top: auto;
+  right: auto;
+  margin: 0px;
+}
+
+.view-renderer-content{
+  position: relative;
+  background-color: black;
+  height: -webkit-calc(100% - 30px);
+  height: -moz-calc(100% - 30px);
+  height: calc(100% - 30px);
+  margin: 0;
+  padding: 0;
+}
+
+/*================================================= patient info in renderer ================================================== */
+.view-renderer-info{
+  position: absolute;
+  z-index: 90;
+  color: #DDE8BB;
+  font-size: 11px;
+}
+.view-renderer-info-topleft{
+  top: 2px;
+  left: 10px;
+}
+.view-renderer-info-topright{
+  top: 2px;
+  right: 10px;
+  text-align:right;
+}
+.view-renderer-info-bottomright{
+  bottom: 2px;
+  right: 10px;
+  text-align:right;
+}
+.view-renderer-info-bottomleft{
+  bottom: 2px;
+  left: 10px;
+}

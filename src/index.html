@@ -1,0 +1,47 @@
+<!DOCTYPE html >
+<html>
+  <head>
+  	<meta charset="utf-8" >
+    <title>renderjs demo</title>
+    <!--Include jquery ui styles -->
+    <link rel="stylesheet"  href="js/components/jquery-ui/themes/smoothness/jquery-ui.min.css">
+    <!--Include renderer box styles -->
+    <link rel="stylesheet"  href="styles/rendererjs.css">
+
+    <!--Application styles -->
+    <style>
+      *{
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+      }
+      div#directoryselection{
+        margin-top: 10px;
+      }
+      h2{
+        font-size: 2em;
+      }
+      div#renderercontainer{
+        background-color: #353535;
+        height: calc(100vh - 12em);
+        width: 100%;
+        margin: 0;
+      }
+    </style>
+
+  </head>
+
+  <body>
+
+    <div id="directoryselection">
+      <h2>Click the button below to choose an image volume</h2>
+      <input id="dirbtn" type="file" multiple>
+    </div>
+
+    <div id="renderercontainer"></div>
+
+    <!-- Load scripts -->
+    <script data-main="main" src="js/components/requirejs/require.js"></script>
+
+  </body>
+</html>
