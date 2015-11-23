@@ -164,7 +164,7 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
             self.maximize();
           }
 
-          self.onRenderChange(evt);
+          self.onRendererChange(evt);
         }
       });
      };
@@ -249,13 +249,13 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
 
        this.onRenderer2DFlipColumns = function(evt) {
          // press W to trigger this event
-         r.flipColumns = !render.flipColumns;
+         r.flipColumns = !r.flipColumns;
          self.onRendererChange(evt);
        };
 
        this.onRenderer2DFlipRows = function(evt) {
          // press Q to trigger this event
-         render.flipRows = !render.flipRows;
+         r.flipRows = !r.flipRows;
          self.onRendererChange(evt);
        };
 
@@ -573,7 +573,7 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
        this.readFile(file, 'readAsText', function(data) {
          callback(JSON.parse(data));
        });
-     }
+     };
 
     /**
      * Read a local or remote file.

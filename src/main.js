@@ -64,39 +64,31 @@ require(['rendererjs', 'fmjs'], function(renderer, fm) {
         renderer.Renderer.imgType(files[i]) === 'dicomzip') {
 
         imgFileObj.imgType = renderer.Renderer.imgType(files[i]);
+
+        if ((imgFileObj.imgType === 'dicom') || (imgFileObj.imgType === 'dicomzip')) {
+
+          // dicom and dicomzip formats contain several files
+          imgFileObj.files = files;
+
+        } else {
+
+          // for other formats only render this volume
+          imgFileObj.files.push(files[i]);
+
+          // also grab the first JSON file with MRI information if there is any
+          for (i=0; i<files.length; i++) {
+
+            if (renderer.Renderer.imgType(files[i]) === 'json') {
+              imgFileObj.json = files[i];
+              break;
+            }
+          }
+        }
+
+        // initialize the renderer
+        r.init(imgFileObj);
         break;
       }
-    }
-
-    if ((imgFileObj.imgType === 'dicom') || (imgFileObj.imgType === 'dicomzip')) {
-
-      // dicom and dicomzip formats contain several files
-      imgFileObj.files = files;
-
-    } else {
-
-      // for other formats only render the first volume
-      for (i=0; i<files.length; i++) {
-
-        if (renderer.Renderer.imgType(files[i]) === 'vol') {
-          imgFileObj.files.push(files[i]);
-          break;
-        }
-      }
-
-      // also grab the first JSON file with MRI information if there is any
-      for (i=0; i<files.length; i++) {
-
-        if (renderer.Renderer.imgType(files[i]) === 'json') {
-          imgFileObj.json = files[i];
-          break;
-        }
-      }
-
-      console.log('imgFileObj: ', imgFileObj);
-
-      // initialize the renderer
-      r.init(imgFileObj);
     }
   };
 });
