@@ -41,6 +41,11 @@ require(['rendererjs', 'fmjs'], function(renderer, fm) {
   // if files are going to be loaded from GDrive
   var r = new renderer.Renderer(options, driveFm);
 
+  // overwrite event handler for the renderer's close button
+  r.onRendererClose = function () {
+    r.destroy();
+  }
+
 
   // Event handler for the directory loader button
   var dirBtn = document.getElementById('dirbtn');

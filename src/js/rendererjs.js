@@ -100,14 +100,15 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
      * Create and initialize the renderer's HTML UI.
      */
      rendererjs.Renderer.prototype.createUI = function() {
-       var url = this.imgFileObj.baseUrl + this.imgFileObj.files[0].name;
        var self = this;
+       var url = self.imgFileObj.baseUrl + self.imgFileObj.files[0].name;
+
 
        // add the appropriate classes to the renderer container
-       this.container.addClass("view-renderer");
+       self.container.addClass("view-renderer");
 
        // append html interface to the renderer's container
-       this.container.append(
+       self.container.append(
 
          // title bar
          '<div class="view-renderer-titlebar ui-dialog-titlebar ui-widget-header ui-corner-all">' +
@@ -154,7 +155,7 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
 
         if (jqBtn.hasClass('view-renderer-titlebar-buttonpane-close')) {
 
-          self.destroy();
+          self.onRendererClose(evt);
 
         } else if (jqBtn.hasClass('view-renderer-titlebar-buttonpane-maximize')) {
 
@@ -210,6 +211,31 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
         util.documentRepaint();
         this.maximized = false;
      };
+
+     /**
+      * This method is called everytime the renderer changes state.
+      *
+      * @param {Object} event object.
+      */
+      rendererjs.Renderer.prototype.onRendererChange = function(evt) {
+
+        console.log('onRendererChange not overwritten!');
+        console.log('event obj: ', evt);
+      };
+
+      /**
+       * This method is called when the close button is clicked.
+       *
+       * @param {Object} event object.
+       */
+       rendererjs.Renderer.prototype.onRendererClose = function(evt) {
+
+         // by default the renderer is just hidden
+         this.container.css({ display: 'none' });
+
+         console.log('onRendererClose not overwritten!');
+         console.log('event obj: ', evt);
+       };
 
      /**
       * Create an XTK 2D renderer object and set the renderer property to that object.
@@ -460,17 +486,6 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
          // UI is ready
          if (callback) { callback(); }
        }
-     };
-
-    /**
-     * This method is called when any of the contained renderers changes status.
-     *
-     * @param {Object} event object.
-     */
-     rendererjs.Renderer.prototype.onRendererChange = function(evt) {
-
-       console.log('onRendererChange not overwritten!');
-       console.log('event obj: ', evt);
      };
 
      /**
