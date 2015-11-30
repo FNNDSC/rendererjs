@@ -19,11 +19,23 @@
         margin-top: 10px;
       }
       h2{
-        font-size: 2em;
+        font-size: 24px;
+      }
+      p{
+        font-size: 14px;
+        font-weight: bold;
+      }
+      div#thumbnail{
+        margin-top: 24px;
+        display: none;
+      }
+      img{
+        height: 96px;
+        width: 96px;
       }
       div#renderercontainer{
         background-color: #353535;
-        height: calc(100vh - 12em);
+        height: calc(100vh - 300px);
         width: 100%;
         margin: 0;
       }
@@ -36,6 +48,11 @@
     <div id="directoryselection">
       <h2>Click the button below to choose an image volume</h2>
       <input id="dirbtn" type="file" multiple>
+    </div>
+
+    <div id="thumbnail">
+      <p>Thumbnail:<p>
+      <img id="thImg">
     </div>
 
     <div id="renderercontainer"></div>

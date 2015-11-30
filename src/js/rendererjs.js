@@ -75,7 +75,7 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
      *     -cloudId: the id of the file in a cloud storage system if stored in the cloud
      *     -name: file name
      *  The files array contains a single file for imgType different from 'dicom' or 'dicomzip'
-     *  -json: HTML5 or custom File object (optional json file with the mri info for imgType different from 'dicom')
+     *  -json: Optional HTML5 or custom File object (optional json file with the mri info for imgType different from 'dicom')
      * @param {Function} optional callback to be called when the renderer is ready.
      */
      rendererjs.Renderer.prototype.init = function(imgFileObj, callback) {
@@ -383,7 +383,6 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
 
       // start the rendering
       r.render();
-
       util.documentRepaint();
     };
 
@@ -485,6 +484,45 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
 
          // UI is ready
          if (callback) { callback(); }
+       }
+     };
+
+     /**
+      * Generate a thumbnail's image data from a snapshot of the internal canvas.
+      *
+      * @param {Function} callback whose argument is the thumbnail's image data.
+      */
+      rendererjs.Renderer.prototype.getThumbnail = function(callback) {
+       var self = this;
+       var r = self.renderer;
+
+       var getThumbnail = function() {
+         var canvas = $('canvas', self.container)[0];
+
+         self.readFile(util.dataURItoJPGBlob(canvas.toDataURL('image/jpeg')), 'readAsDataURL', function(thData) {
+           callback(thData);
+         });
+       };
+
+       //
+       // thumbnail can be generated only after the first rendering has happen
+       //
+
+       r.afterRender = function() {
+
+         if (!self.renderedOnce) {
+           self.renderedOnce = true;
+           getThumbnail();
+         }
+       };
+
+       if (self.renderedOnce) {
+         getThumbnail();
+
+       } else {
+         // start a rendering
+         r.render();
+         util.documentRepaint();
        }
      };
 

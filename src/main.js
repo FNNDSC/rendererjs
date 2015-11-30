@@ -26,7 +26,7 @@ require.config({
 require(['rendererjs', 'fmjs'], function(renderer, fm) {
   // Entry point
 
-  // Create a file manager object
+  // Create a file manager object (optional)
   var CLIENT_ID = '1050768372633-ap5v43nedv10gagid9l70a2vae8p9nah.apps.googleusercontent.com';
   var driveFm = new fm.GDriveFileManager(CLIENT_ID);
 
@@ -37,21 +37,24 @@ require(['rendererjs', 'fmjs'], function(renderer, fm) {
     orientation: 'Z'
   };
 
-  // Create a renderer. The second parameter (a file manager) is optional and only required
-  // if files are going to be loaded from GDrive
-  var r = new renderer.Renderer(options, driveFm);
-
-  // overwrite event handler for the renderer's close button
-  r.onRendererClose = function () {
-    r.destroy();
-  }
-
-
   // Event handler for the directory loader button
   var dirBtn = document.getElementById('dirbtn');
 
   dirBtn.onchange = function(e) {
     var files = e.target.files;
+
+    dirBtn.disabled = true;
+
+    // Create a renderer. The second parameter (a file manager) is optional and only required
+    // if files are going to be loaded from GDrive
+    var r = new renderer.Renderer(options, driveFm);
+
+    // overwrite event handler for the renderer's close button
+    r.onRendererClose = function () {
+      r.destroy();
+      $('#thumbnail').css('display', 'none');
+      dirBtn.disabled = false;
+    }
 
     // Image file object
     var imgFileObj = {
@@ -91,7 +94,15 @@ require(['rendererjs', 'fmjs'], function(renderer, fm) {
         }
 
         // initialize the renderer
-        r.init(imgFileObj);
+        r.init(imgFileObj, function() {
+
+          r.getThumbnail( function(thData) {
+
+            $('#thumbnail').css('display', 'block');
+            img = $('img').attr('src', thData);
+          });
+        });
+
         break;
       }
     }
