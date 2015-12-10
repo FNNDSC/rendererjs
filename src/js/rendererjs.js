@@ -61,6 +61,9 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
 
       // associated image file object
       this.imgFileObj = null;
+
+      // renderer status (true when the rendering failed)
+      this.error = false;
     };
 
     /**
@@ -76,7 +79,8 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
      *     -name: file name
      *  The files array contains a single file for imgType different from 'dicom' or 'dicomzip'
      *  -json: Optional HTML5 or custom File object (optional json file with the mri info for imgType different from 'dicom')
-     * @param {Function} optional callback to be called when the renderer is ready.
+     * @param {Function} optional callback to be called when the renderer is ready. If the rendering failed then the
+     * renderer's error property is set to true.
      */
      rendererjs.Renderer.prototype.init = function(imgFileObj, callback) {
        var self = this;
@@ -101,8 +105,8 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
      */
      rendererjs.Renderer.prototype.createUI = function() {
        var self = this;
-       var url = self.imgFileObj.baseUrl + self.imgFileObj.files[0].name;
 
+       var url = self.imgFileObj.baseUrl + self.imgFileObj.files[0].name;
 
        // add the appropriate classes to the renderer container
        self.container.addClass("view-renderer");
@@ -140,12 +144,19 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
       $('span', jqButtons).addClass("ui-button-icon-primary ui-icon");
 
       jqButtons.mouseover(function() {
+
         return $(this).addClass("ui-state-hover");
+
       }).mouseout(function() {
+
         return $(this).removeClass("ui-state-hover");
+
       }).focus(function() {
+
         return $(this).addClass("ui-state-focus");
+
       }).blur(function() {
+
         return $(this).removeClass("ui-state-focus");
       });
 
@@ -160,8 +171,11 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
         } else if (jqBtn.hasClass('view-renderer-titlebar-buttonpane-maximize')) {
 
           if (self.maximized) {
+
             self.restore();
+
           } else {
+
             self.maximize();
           }
 
@@ -174,6 +188,7 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
       * Maximize the renderer's window
       */
       rendererjs.Renderer.prototype.maximize = function() {
+
         var jqBtn = $('.view-renderer-titlebar-buttonpane-maximize', this.container);
 
         jqBtn.attr('title', 'Restore');
@@ -197,6 +212,7 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
       * Restore the renderer's window to its original size
       */
       rendererjs.Renderer.prototype.restore = function() {
+
         var jqBtn = $('.view-renderer-titlebar-buttonpane-maximize', this.container);
 
         jqBtn.attr('title', 'Maximize');
@@ -241,72 +257,79 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
       * Create an XTK 2D renderer object and set the renderer property to that object.
       */
       rendererjs.Renderer.prototype.createRenderer = function() {
-       var r;
-       var self = this;
+        var self = this;
 
-       if (self.renderer) { return; }
+        if (self.renderer) { return; }
 
-       // create xtk object
-       r = new X.renderer2D();
-       r.container = self.rendererId;
-       r.bgColor = [0.2, 0.2, 0.2];
-       r.orientation = self.orientation;
-       r.init();
+        // create xtk object
+        var r = new X.renderer2D();
+        r.container = self.rendererId;
+        r.bgColor = [0.2, 0.2, 0.2];
+        r.orientation = self.orientation;
+        r.init();
 
-       //
-       // XTK renderer's UI event handlers
-       //
-       this.onRenderer2DScroll = function(evt) {
-         self.updateUISliceInfo();
-         self.onRendererChange(evt);
-       };
+        //
+        // XTK renderer's UI event handlers
+        //
+        this.onRenderer2DScroll = function(evt) {
 
-       this.onRenderer2DZoom = function(evt) {
-         self.onRendererChange(evt);
-       };
+          self.updateUISliceInfo();
+          self.onRendererChange(evt);
+        };
 
-       this.onRenderer2DPan = function(evt) {
-         self.onRendererChange(evt);
-       };
+        this.onRenderer2DZoom = function(evt) {
 
-       this.onRenderer2DRotate = function(evt) {
-         self.onRendererChange(evt);
-       };
+          self.onRendererChange(evt);
+        };
 
-       this.onRenderer2DFlipColumns = function(evt) {
-         // press W to trigger this event
-         r.flipColumns = !r.flipColumns;
-         self.onRendererChange(evt);
-       };
+        this.onRenderer2DPan = function(evt) {
 
-       this.onRenderer2DFlipRows = function(evt) {
-         // press Q to trigger this event
-         r.flipRows = !r.flipRows;
-         self.onRendererChange(evt);
-       };
+          self.onRendererChange(evt);
+        };
 
-       this.onRenderer2DPoint = function(evt) {
-         self.onRendererChange(evt);
-       };
+        this.onRenderer2DRotate = function(evt) {
 
-       // bind event handler callbacks with the renderer's interactor
-       r.interactor.addEventListener(X.event.events.SCROLL, this.onRenderer2DScroll);
-       r.interactor.addEventListener(X.event.events.ZOOM, this.onRenderer2DZoom);
-       r.interactor.addEventListener(X.event.events.PAN, this.onRenderer2DPan);
-       r.interactor.addEventListener(X.event.events.ROTATE, this.onRenderer2DRotate);
-       r.interactor.addEventListener("flipColumns", this.onRenderer2DFlipColumns);
-       r.interactor.addEventListener("flipRows", this.onRenderer2DFlipRows);
+          self.onRendererChange(evt);
+        };
 
-       // called every time the pointing position is changed with shift+left-mouse
-       r.addEventListener("onPoint", this.onRenderer2DPoint);
+        this.onRenderer2DFlipColumns = function(evt) {
 
-       self.renderer = r;
+          // press W to trigger this event
+          r.flipColumns = !r.flipColumns;
+          self.onRendererChange(evt);
+        };
+
+        this.onRenderer2DFlipRows = function(evt) {
+
+          // press Q to trigger this event
+          r.flipRows = !r.flipRows;
+          self.onRendererChange(evt);
+        };
+
+        this.onRenderer2DPoint = function(evt) {
+
+          self.onRendererChange(evt);
+        };
+
+        // bind event handler callbacks with the renderer's interactor
+        r.interactor.addEventListener(X.event.events.SCROLL, this.onRenderer2DScroll);
+        r.interactor.addEventListener(X.event.events.ZOOM, this.onRenderer2DZoom);
+        r.interactor.addEventListener(X.event.events.PAN, this.onRenderer2DPan);
+        r.interactor.addEventListener(X.event.events.ROTATE, this.onRenderer2DRotate);
+        r.interactor.addEventListener("flipColumns", this.onRenderer2DFlipColumns);
+        r.interactor.addEventListener("flipRows", this.onRenderer2DFlipRows);
+
+        // called every time the pointing position is changed with shift+left-mouse
+        r.addEventListener("onPoint", this.onRenderer2DPoint);
+
+        self.renderer = r;
      };
 
     /**
      * Create an XTK volume object and set the volume property to that object.
      */
      rendererjs.Renderer.prototype.createVolume = function() {
+
       var fileNames = [];
       var imgFileObj = this.imgFileObj;
 
@@ -314,10 +337,13 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
       if (this.volume) {return;}
 
       if (imgFileObj.imgType === 'dicomzip') {
+
         for (var i=0; i<imgFileObj.files.length; i++) {
           fileNames[i] = imgFileObj.files[i].name.replace('.zip', '');
         }
+
       } else {
+
         for (var j=0; j<imgFileObj.files.length; j++) {
           fileNames[j] = imgFileObj.files[j].name;
         }
@@ -325,8 +351,10 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
       // create xtk object
       var vol = new X.volume();
       vol.reslicing = 'false';
+
       vol.file = fileNames.sort().map(function(str) {
-        return imgFileObj.baseUrl + str;});
+
+        return imgFileObj.baseUrl + str;} );
 
       this.volume = vol;
     };
@@ -344,12 +372,15 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
        volProps.index = 'index' + orientation;
 
        switch(orientation) {
+
          case 'X':
            volProps.rangeInd = 0;
          break;
+
          case 'Y':
            volProps.rangeInd = 1;
          break;
+
          case 'Z':
            volProps.rangeInd = 2;
          break;
@@ -361,35 +392,61 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
     /**
      * Perform the actual rendering of the volume data.
      *
-     * @param {Function} optional callback to be called when the XTK renderer object is ready.
+     * @param {Function} optional callback to be called when the renderer is ready. If
+     * the rendering failed then the renderer's error property is set to true.
      */
      rendererjs.Renderer.prototype.renderVolume = function(callback) {
-      var r = this.renderer;
-      var vol = this.volume;
-      var self = this;
+       var self = this;
 
-      // the onShowtime event handler gets executed after all files were fully loaded and
-      // just before the first rendering attempt
-      r.onShowtime = function() {
+       var r = self.renderer;
+       var vol = self.volume;
 
-        self.setUIMriInfo( function() {
+       // the onShowtime event handler gets executed after all files were fully loaded and
+       // just before the first rendering attempt
+       r.onShowtime = function() {
 
-          // renderer is ready
+         if (vol.status === 'INVALID') {
+
+           // there were XTK errors while parsing the volume
+           self.error = true;
+           console.error('Could not render volume ' + self.imgFileObj.baseUrl);
+
+           if (callback) { callback(); }
+
+         } else {
+
+           self.setUIMriInfo( function() {
+
+             // renderer is ready
+              if (callback) { callback(); }
+            });
+          }
+        };
+
+        try {
+
+          r.add(vol);
+
+        } catch(err) {
+
+          self.error = true;
+          console.error('Could not render volume ' + self.imgFileObj.baseUrl + ' - ' + err);
+
           if (callback) { callback(); }
-        });
-      };
 
-      r.add(vol);
+          return;
+        }
 
-      // start the rendering
-      r.render();
-      util.documentRepaint();
+        // start the rendering
+        r.render();
+        util.documentRepaint();
     };
 
     /**
      * Update slice info on the HTML.
      */
      rendererjs.Renderer.prototype.updateUISliceInfo = function() {
+
        var volProps = this.getVolProps(this.orientation);
        var vol = this.volume;
 
@@ -404,6 +461,7 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
      */
      rendererjs.Renderer.prototype.setUIMriInfo = function(callback) {
        var self = this;
+
        var imgFileObj = self.imgFileObj;
        var vol = self.volume;
 
@@ -471,6 +529,7 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
 
          // if instead there is dicom information then use it
          var mriInfo = imgFileObj.dicomInfo;
+
          mriInfo.dimensions = (vol.range[0]) + ' x ' + (vol.range[1]) + ' x ' + (vol.range[2]);
          mriInfo.voxelSizes = vol.spacing[0].toPrecision(4) + ', ' + vol.spacing[1].toPrecision(4) +
          ', ' + vol.spacing[2].toPrecision(4);
@@ -493,38 +552,42 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
       * @param {Function} callback whose argument is the thumbnail's image data.
       */
       rendererjs.Renderer.prototype.getThumbnail = function(callback) {
-       var self = this;
-       var r = self.renderer;
+        var self = this;
+        var r = self.renderer;
 
-       var getThumbnail = function() {
-         var canvas = $('canvas', self.container)[0];
+        var getThumbnail = function() {
 
-         self.readFile(util.dataURItoJPGBlob(canvas.toDataURL('image/jpeg')), 'readAsDataURL', function(thData) {
-           callback(thData);
-         });
-       };
+          var canvas = $('canvas', self.container)[0];
 
-       //
-       // thumbnail can be generated only after the first rendering has happen
-       //
+          self.readFile(util.dataURItoJPGBlob(canvas.toDataURL('image/jpeg')), 'readAsDataURL', function(thData) {
 
-       r.afterRender = function() {
+            callback(thData);
+          });
+        };
 
-         if (!self.renderedOnce) {
-           self.renderedOnce = true;
-           getThumbnail();
+        //
+        // thumbnail can be generated only after the first rendering has happen
+        //
+        r.afterRender = function() {
+
+          if (!self.renderedOnce) {
+
+            self.renderedOnce = true;
+            getThumbnail();
+          }
+        };
+
+        if (self.renderedOnce) {
+
+          getThumbnail();
+
+        } else {
+
+          // start a rendering
+          r.render();
+          util.documentRepaint();
          }
        };
-
-       if (self.renderedOnce) {
-         getThumbnail();
-
-       } else {
-         // start a rendering
-         r.render();
-         util.documentRepaint();
-       }
-     };
 
      /**
       * Destroy all objects and remove html interface
@@ -532,26 +595,29 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
       rendererjs.Renderer.prototype.destroy = function() {
         var r = this.renderer;
 
-       // destroy XTK renderers
-       r.remove(this.volume);
-       this.volume.destroy();
-       r.interactor.removeEventListener(X.event.events.SCROLL, this.onRenderer2DScroll);
-       r.interactor.removeEventListener(X.event.events.ZOOM, this.onRenderer2DZoom);
-       r.interactor.removeEventListener(X.event.events.PAN, this.onRenderer2DPan);
-       r.interactor.removeEventListener(X.event.events.ROTATE, this.onRenderer2DRotate);
-       r.interactor.removeEventListener("flipColumns", this.onRenderer2DFlipColumns);
-       r.interactor.removeEventListener("flipRows", this.onRenderer2DFlipRows);
-       r.removeEventListener("onPoint", this.onRenderer2DPoint);
-       r.destroy();
+        // destroy XTK renderers
+        r.remove(this.volume);
+        this.volume.destroy();
 
-       // remove html
-       this.container.empty();
+        r.interactor.removeEventListener(X.event.events.SCROLL, this.onRenderer2DScroll);
+        r.interactor.removeEventListener(X.event.events.ZOOM, this.onRenderer2DZoom);
+        r.interactor.removeEventListener(X.event.events.PAN, this.onRenderer2DPan);
+        r.interactor.removeEventListener(X.event.events.ROTATE, this.onRenderer2DRotate);
+        r.interactor.removeEventListener("flipColumns", this.onRenderer2DFlipColumns);
+        r.interactor.removeEventListener("flipRows", this.onRenderer2DFlipRows);
+        r.removeEventListener("onPoint", this.onRenderer2DPoint);
+        r.destroy();
 
-       // clear objects
-       this.renderer = null;
-       this.volume = null;
-       this.maximized = false;
-     };
+        // remove html
+        this.container.empty();
+
+        // clear objects
+        this.renderer = null;
+        this.volume = null;
+        this.maximized = false;
+        this.fileManager = null;
+        this.imgFileObj = null;
+      };
 
      /**
       * Read the local or remote volume files.
@@ -559,11 +625,12 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
       * @param {Function} callback to be called when all volume files have been read.
       */
       rendererjs.Renderer.prototype.readVolumeFiles = function(callback) {
-        var imgFileObj = this.imgFileObj;
-        var vol = this.volume;
+        var self = this;
+
+        var imgFileObj = self.imgFileObj;
+        var vol = self.volume;
         var numFiles = 0;
         var filedata = [];
-        var self = this;
 
         // function to read a single volume file
         function readFile(file, ix) {
@@ -583,20 +650,27 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
                   for (var i=0; i<filedata.length; i++) {
                     fDataArr = fDataArr.concat(self.unzipFileData(filedata[i]));
                   }
+
                   fDataArr = util.sortObjArr(fDataArr, 'name');
 
                   filedata = [];
                   var urls = [];
+
                   for (i=0; i<fDataArr.length; i++) {
+
                     filedata.push(fDataArr[i].data);
                     urls.push(imgFileObj.baseUrl + fDataArr[i].name);
                   }
+
                   vol.file = urls;
                 }
 
                 try {
+
                   imgFileObj.dicomInfo = rendererjs.Renderer.parseDicom(filedata[0]);
+
                 } catch(err) {
+
                   console.log('Could not parse dicom ' + imgFileObj.baseUrl + ' Error - ' + err);
                 }
               }
@@ -609,6 +683,7 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
 
         // read all neuroimage files in imgFileObj.files
         for (var i=0; i<imgFileObj.files.length; i++) {
+
           readFile(imgFileObj.files[i], i);
         }
       };
@@ -623,7 +698,9 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
      * @param {Function} callback whose argument is a JSON object with the file data.
      */
      rendererjs.Renderer.prototype.readJSONFile = function(file, callback) {
+
        this.readFile(file, 'readAsText', function(data) {
+
          callback(JSON.parse(data));
        });
      };
@@ -639,32 +716,44 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
      * @param {Function} callback whose argument is the file data.
      */
      rendererjs.Renderer.prototype.readFile = function(file, readingMethod, callback) {
-      var reader = new FileReader();
       var self = this;
+
+      var reader = new FileReader();
 
       reader.onload = function() {
         callback(reader.result);
       };
 
       if (file.remote) {
+
         // the file is in a remote storage
         if (file.cloudId) {
+
           // the file is in the cloud
           if (self.fileManager) {
+
             // reading files from the cloud was enabled
             self.fileManager.getFileBlob(file.cloudId, function(blob) {
+
               reader[readingMethod](blob);
             });
+
           } else {
+
             console.error('No file manager found. Reading files from cloud was not enabled');
           }
+
         } else {
+
           // the file is in a remote backend
           util.urlToBlob(file.url, function(blob) {
+
             reader[readingMethod](blob);
           });
         }
+
       } else {
+
         // read the file locally
         reader[readingMethod](file);
       }
@@ -682,6 +771,7 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
      * array contains the data for a single zip file.
      */
      rendererjs.Renderer.prototype.zipFiles = function(fileArr, callback) {
+
       var url, fileName;
       var fileDataArr = [];
 
@@ -692,21 +782,28 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
         var byteLength = 0;
 
         for (var i=0; i<fileDataArr.length; i++) {
+
           // maximum zip file size is 20 MB
           if (byteLength + fileDataArr[i].data.byteLength <= 20971520) {
+
             byteLength += fileDataArr[i].data.byteLength;
             zip.file(fileDataArr[i].name, fileDataArr[i].data);
+
           } else {
+
             // generate the zip file contents for the current chunk of files
             contents = zip.generate({type:"arraybuffer"});
             zipDataArr.push(contents);
+
             // create a new zip for the next chunk of files
             zip = jszip();
             byteLength = fileDataArr[i].data.byteLength;
             zip.file(fileDataArr[i].name, fileDataArr[i].data);
           }
+
           // generate the zip file contents for the last chunk of files
           if (i+1>=fileDataArr.length) {
+
             contents = zip.generate({type:"arraybuffer"});
             zipDataArr.push(contents);
           }
@@ -716,21 +813,28 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
       }
 
       function addFile(fName, fData) {
+
         fileDataArr.push({name: fName, data: fData});
 
         if (fileDataArr.length === fileArr.length) {
+
           // all files have been read so generate the zip files' contents
           callback(zipFiles());
         }
       }
 
       for (var i=0; i<fileArr.length; i++) {
+
         if (fileArr[i].remote) {
+
           url = fileArr[i].url;
           fileName = url.substring(url.lastIndexOf('/') + 1);
+
         } else {
+
           fileName = fileArr[i].name;
         }
+
         this.readFile(fileArr[i], 'readAsArrayBuffer', addFile.bind(null, fileName));
       }
     };
@@ -743,12 +847,14 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
      * name and data: the file's data.
      */
      rendererjs.Renderer.prototype.unzipFileData = function(zData) {
+
       var zip = jszip(zData);
       var fileDataArr = [];
 
       for (var name in zip.files) {
         fileDataArr.push({name: name, data: zip.file(name).asArrayBuffer()});
       }
+
       return fileDataArr;
     };
 
@@ -760,6 +866,7 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
      * 'thumbnail', 'json' or 'unsupported'
      */
      rendererjs.Renderer.imgType = function(file) {
+
       var ext = {};
       var type;
       var name = file.name;
@@ -832,6 +939,7 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
       // Here we use Chafey's dicomParser: https://github.com/chafey/dicomParser.
       // dicomParser requires as input a Uint8Array so we create it here
       var byteArray = new Uint8Array(dicomFileData);
+
       // Invoke the parseDicom function and get back a DataSet object with the contents
       var dataSet = dicomParser.parseDicom(byteArray);
 

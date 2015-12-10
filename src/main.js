@@ -51,9 +51,8 @@ require(['rendererjs', 'fmjs'], function(renderer, fm) {
 
     // overwrite event handler for the renderer's close button
     r.onRendererClose = function () {
-      r.destroy();
-      $('#thumbnail').css('display', 'none');
-      dirBtn.disabled = false;
+
+      destroyRenderer(r);
     }
 
     // Image file object
@@ -96,15 +95,30 @@ require(['rendererjs', 'fmjs'], function(renderer, fm) {
         // initialize the renderer
         r.init(imgFileObj, function() {
 
-          r.getThumbnail( function(thData) {
+          if (r.error) {
 
-            $('#thumbnail').css('display', 'block');
-            img = $('img').attr('src', thData);
-          });
+            destroyRenderer(r);
+
+          } else {
+
+            r.getThumbnail(function(thData) {
+
+              $('#thumbnail').css('display', 'block');
+              img = $('img').attr('src', thData);
+            });
+          }
         });
 
         break;
       }
     }
   };
+
+
+  function destroyRenderer(r) {
+
+    r.destroy();
+    $('#thumbnail').css('display', 'none');
+    dirBtn.disabled = false;
+  }
 });
