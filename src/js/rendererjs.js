@@ -48,6 +48,9 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
 
       // xtk renderer object
       this.renderer = null;
+      this.scene = null;
+      this.camera = null;
+      this.fileNames = null;
 
       // xtk volume object
       this.volume = null;
@@ -241,17 +244,37 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
       * Create an XTK 2D renderer object and set the renderer property to that object.
       */
       rendererjs.Renderer.prototype.createRenderer = function() {
-       var r;
+       var r, s, c, co;
        var self = this;
 
        if (self.renderer) { return; }
 
+       // create THREEJS renderer
+       var threeD = document.getElementById(self.rendererId);
+       r = new THREE.WebGLRenderer({
+         antialias: true
+        });
+       r.setSize(threeD.offsetWidth, threeD.offsetHeight);
+       r.setClearColor(0x35FF35, 1);
+       r.setPixelRatio(window.devicePixelRatio);
+       threeD.appendChild(r.domElement);
+
+       s = new THREE.Scene();
+
+       c = new THREE.PerspectiveCamera(45, threeD.offsetWidth / threeD.offsetHeight, 0.01, 10000000);
+       c.position.x = 50;
+       c.position.y = 50;
+       c.position.z = 50;
+
+       co = new THREE.TrackballControls(c, threeD);
+
+
        // create xtk object
-       r = new X.renderer2D();
-       r.container = self.rendererId;
-       r.bgColor = [0.2, 0.2, 0.2];
-       r.orientation = self.orientation;
-       r.init();
+       // r = new X.renderer2D();
+       // r.container = self.rendererId;
+       // r.bgColor = [0.2, 0.2, 1];
+       // r.orientation = self.orientation;
+       // r.init();
 
        //
        // XTK renderer's UI event handlers
@@ -290,17 +313,20 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
        };
 
        // bind event handler callbacks with the renderer's interactor
-       r.interactor.addEventListener(X.event.events.SCROLL, this.onRenderer2DScroll);
-       r.interactor.addEventListener(X.event.events.ZOOM, this.onRenderer2DZoom);
-       r.interactor.addEventListener(X.event.events.PAN, this.onRenderer2DPan);
-       r.interactor.addEventListener(X.event.events.ROTATE, this.onRenderer2DRotate);
-       r.interactor.addEventListener("flipColumns", this.onRenderer2DFlipColumns);
-       r.interactor.addEventListener("flipRows", this.onRenderer2DFlipRows);
+       // r.interactor.addEventListener(X.event.events.SCROLL, this.onRenderer2DScroll);
+       // r.interactor.addEventListener(X.event.events.ZOOM, this.onRenderer2DZoom);
+       // r.interactor.addEventListener(X.event.events.PAN, this.onRenderer2DPan);
+       // r.interactor.addEventListener(X.event.events.ROTATE, this.onRenderer2DRotate);
+       // r.interactor.addEventListener("flipColumns", this.onRenderer2DFlipColumns);
+       // r.interactor.addEventListener("flipRows", this.onRenderer2DFlipRows);
 
        // called every time the pointing position is changed with shift+left-mouse
-       r.addEventListener("onPoint", this.onRenderer2DPoint);
+       // r.addEventListener("onPoint", this.onRenderer2DPoint);
 
        self.renderer = r;
+       self.scene = s;
+       self.camera = c;
+       self.controls = co;
      };
 
     /**
@@ -322,6 +348,8 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
           fileNames[j] = imgFileObj.files[j].name;
         }
       }
+      // OK, can grab this.volume.file....
+
       // create xtk object
       var vol = new X.volume();
       vol.reslicing = 'false';
@@ -329,6 +357,8 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
         return imgFileObj.baseUrl + str;});
 
       this.volume = vol;
+      this.fileNames = fileNames.sort().map(function(str) {
+        return imgFileObj.baseUrl + str;});
     };
 
     /**
@@ -365,25 +395,100 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
      */
      rendererjs.Renderer.prototype.renderVolume = function(callback) {
       var r = this.renderer;
+      var s = this.scene;
+      var c = this.camera;
+      var co = this.controls;
+
       var vol = this.volume;
       var self = this;
 
       // the onShowtime event handler gets executed after all files were fully loaded and
       // just before the first rendering attempt
-      r.onShowtime = function() {
+      // r.onShowtime = function() {
 
-        self.setUIMriInfo( function() {
+      //   self.setUIMriInfo( function() {
 
-          // renderer is ready
-          if (callback) { callback(); }
-        });
-      };
+      //     // renderer is ready
+      //     if (callback) { callback(); }
+      //   });
+      // };
 
-      r.add(vol);
+      // download + parse volume
+      // VJS STUFF HERE...
+      // create a loader...
+      var loader = new VJS.Loaders.Dicom();
+
+      //
+      var seriesContainer = [];
+      var loadSequence = [];
+      // check of filedata is array or not...
+      vol.filedata.forEach(function(ab) {
+        loadSequence.push(
+          Promise.resolve()
+          // fetch the file
+          .then(function() {
+            return loader.parse(ab);
+          })
+          .then(function(series) {
+            seriesContainer.push(series);
+          })
+          .catch(function(error) {
+            window.console.log('oops... something went wrong...');
+            window.console.log(error);
+          })
+        );
+      });
+
+      Promise
+      .all(loadSequence)
+      .then(function(){
+        var mergedSeriesContainer = [seriesContainer[0]];
+        // if all files loaded
+        for (var i = 0; i < seriesContainer.length; i++) {
+          // test image against existing imagess
+          for (var j = 0; j < mergedSeriesContainer.length; j++) {
+            if (mergedSeriesContainer[j].merge(seriesContainer[i])) {
+              // merged successfully
+              break;
+            } else if (j === mergedSeriesContainer.length - 1) {
+              // last merge was not successful
+              // this is a new image
+              mergedSeriesContainer.push(seriesContainer[i]);
+            }
+          }
+        }
+      
+        var series = mergedSeriesContainer[0];
+
+        var stack  = series._stack[0];
+        var stackHelper = new VJS.Helpers.Stack(stack);
+        stackHelper.bbox.visible = true;
+        stackHelper.border.color = 0x76FF03;
+        s.add(stackHelper);
+
+        // r.add(vol);
 
       // start the rendering
-      r.render();
+      // r.render();
+      function animate() {
+        co.update();
+        r.render(s, c);
+
+        // request new frame
+        requestAnimationFrame(function() {
+          animate();
+        });
+      }
+
+      animate();
+
       util.documentRepaint();
+      })
+      .catch(function(error) {
+        window.console.log('oops... something went wrong...');
+        window.console.log(error);
+      });
+
     };
 
     /**
