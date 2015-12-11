@@ -403,7 +403,7 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
 
        // the onShowtime event handler gets executed after all files were fully loaded and
        // just before the first rendering attempt
-       r.onShowtime = function() {
+       r.afterRender = function() {
 
          if (vol.status === 'INVALID') {
 
@@ -421,6 +421,7 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
               if (callback) { callback(); }
             });
           }
+          r.afterRender = function(){};
         };
 
         try {
