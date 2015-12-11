@@ -16,6 +16,7 @@ require.config({
     jszip: 'jszip/dist/jszip',
     dicomParser: 'dicomParser/dist/dicomParser.min',
     xtk: '../lib/xtk',
+    vjs: '../lib/vjs',
     utiljs: 'utiljs/src/js/utiljs',
     fmjs: 'fmjs/src/js/fmjs',
     rendererjs: '../rendererjs'

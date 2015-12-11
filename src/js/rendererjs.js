@@ -3,7 +3,7 @@
  */
 
 // define a new module
-define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, jszip) {
+define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser', 'vjs'], function(util, jszip) {
 
   /**
    * Provide a namespace for the renderer module
@@ -114,14 +114,14 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
        self.container.append(
 
          // title bar
-         '<div class="view-renderer-titlebar ui-dialog-titlebar ui-widget-header ui-corner-all">' +
+         '<div class="view-renderer-titlebar ui-dialog-titlebar">' +
            '<span class="view-renderer-titlebar-title">' + url + '</span>' +
            '<div class="view-renderer-titlebar-buttonpane">' +
              '<button type="button" class="view-renderer-titlebar-buttonpane-close ui-dialog-titlebar-close" role="button" title="Close">' +
-               '<span class="ui-icon-closethick"></span>' +
+               '<i class="fa fa-close"></i>' +
              '</button>' +
              '<button type="button" class="view-renderer-titlebar-buttonpane-maximize ui-dialog-titlebar-maximize" role="button" title="Maximize">' +
-               '<span class="ui-icon-extlink"></span>' +
+               '<i class="fa fa-expand"></i>' +
              '</button>' +
            '</div>' +
          '</div>' +
@@ -139,7 +139,7 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
 
       var jqButtons = $('button', self.container);
 
-      jqButtons.addClass("ui-button ui-widget ui-state-default ui-corner-all");
+      jqButtons.addClass("ui-button ui-widget");
       $('span', jqButtons).addClass("ui-button-icon-primary ui-icon");
 
       jqButtons.mouseover(function() {
@@ -183,7 +183,7 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
 
         // toggle classes from maximize to restore
         jqBtn.removeClass("ui-dialog-titlebar-maximize").addClass("ui-dialog-titlebar-restore");
-        jqBtn.find('span').removeClass("ui-icon-extlink").addClass("ui-icon-newwin");
+        jqBtn.find('i').removeClass("fa-expand").addClass("fa-compress");
 
         // save the current renderer's dimensions
         this.height = this.container.css('height');
@@ -206,7 +206,7 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
 
         // toggle classes from restore to maximize
         jqBtn.removeClass("ui-dialog-titlebar-restore").addClass("ui-dialog-titlebar-maximize");
-        jqBtn.find('span').removeClass("ui-icon-newwin").addClass("ui-icon-extlink");
+        jqBtn.find('i').removeClass("fa-compress").addClass("fa-expand");
 
         // style renderer
         this.container.css({display: 'block', height: this.height, width: this.width});
@@ -254,19 +254,37 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
        r = new THREE.WebGLRenderer({
          antialias: true
         });
-       r.setSize(threeD.offsetWidth, threeD.offsetHeight);
+       r.setSize(threeD.clientWidth, threeD.clientHeight);
        r.setClearColor(0x35FF35, 1);
        r.setPixelRatio(window.devicePixelRatio);
        threeD.appendChild(r.domElement);
 
+       function onWindowResize() {
+
+        window.console.log('resize called!');
+        var threeD = document.getElementById(self.rendererId);
+        var camFactor = 2;
+        c.left = -threeD.clientWidth / camFactor;
+        c.right = threeD.clientWidth / camFactor;
+        c.top = threeD.clientHeight / camFactor;
+        c.bottom = -threeD.clientHeight / camFactor;
+        // for non ortho camera...
+        // c.aspect = threeD.offsetWidth / threeD.offsetHeight;
+        c.updateProjectionMatrix();
+
+        r.setSize(threeD.clientWidth, threeD.clientHeight);
+        window.console.log(threeD.clientHeight);
+       }
+
+       window.addEventListener('resize', onWindowResize, false);
+
        s = new THREE.Scene();
 
-       c = new THREE.PerspectiveCamera(45, threeD.offsetWidth / threeD.offsetHeight, 0.01, 10000000);
-       c.position.x = 50;
-       c.position.y = 50;
-       c.position.z = 50;
+       c = new THREE.OrthographicCamera(threeD.clientWidth / -2, threeD.clientWidth / 2, threeD.clientHeight / 2, threeD.clientHeight / -2, 1, 1000);
 
-       co = new THREE.TrackballControls(c, threeD);
+       co = new THREE.OrthographicTrackballControls(c, threeD);
+       co.staticMoving = true;
+       co.noRotate = true;
 
 
        // create xtk object
@@ -421,8 +439,15 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
       //
       var seriesContainer = [];
       var loadSequence = [];
+
+      // make sure filedata is an array
+      var fileData = vol.filedata;
+      if(!Array.isArray(vol.filedata)){
+        fileData = [vol.filedata];
+      }
+
       // check of filedata is array or not...
-      vol.filedata.forEach(function(ab) {
+      fileData.forEach(function(ab) {
         loadSequence.push(
           Promise.resolve()
           // fetch the file
@@ -442,6 +467,7 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
       Promise
       .all(loadSequence)
       .then(function(){
+        // when all parsed, render it!
         var mergedSeriesContainer = [seriesContainer[0]];
         // if all files loaded
         for (var i = 0; i < seriesContainer.length; i++) {
@@ -462,9 +488,69 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
 
         var stack  = series._stack[0];
         var stackHelper = new VJS.Helpers.Stack(stack);
-        stackHelper.bbox.visible = true;
-        stackHelper.border.color = 0x76FF03;
+        stackHelper.bbox.visible = false;
+        stackHelper.border.visible = false;
         s.add(stackHelper);
+
+        // update camera accordingly
+        // up in image space
+        var upStart = new THREE.Vector3(0, 0, 0);
+        var upEnd = new THREE.Vector3(0, 0, 1);
+        // to LPS space
+        upStart.applyMatrix4(stack.ijk2LPS);
+        upEnd.applyMatrix4(stack.ijk2LPS);
+
+        var camUtils = {
+          up: null,
+          // front back
+          start : null,
+          stop : null,
+          invertRows: true,
+          invertColumns: true
+        };
+        
+        // update the up vector
+        camUtils.up = stack.yCosine.clone();
+
+        var firstVoxel = new THREE.Vector3(0, 0, 0);
+        firstVoxel.applyMatrix4(stack.ijk2LPS);
+        var lastVoxel = new THREE.Vector3(stack.dimensionsIJK.x - 1, stack.dimensionsIJK.y - 1, stack.dimensionsIJK.z - 1);
+        lastVoxel.applyMatrix4(stack.ijk2LPS);
+
+        var lpsBBox = [
+          Math.min(firstVoxel.x, lastVoxel.x),
+          Math.min(firstVoxel.y, lastVoxel.y),
+          Math.min(firstVoxel.z, lastVoxel.z),
+          Math.max(firstVoxel.x, lastVoxel.x),
+          Math.max(firstVoxel.y, lastVoxel.y),
+          Math.max(firstVoxel.z, lastVoxel.z)];
+                         
+        var lpsCenter = new THREE.Vector3(
+          lpsBBox[0] + (lpsBBox[3] - lpsBBox[0]) / 2,
+          lpsBBox[1] + (lpsBBox[4] - lpsBBox[1]) / 2,
+          lpsBBox[2] + (lpsBBox[5] - lpsBBox[2]) / 2);
+
+        // intersection ray  with box
+       // ray: {position, direction}
+        // box: {halfDimensions, center}
+        var ray = {position: null, direction: null};
+        ray.position = lpsCenter;
+        ray.direction = stack.zCosine.clone();
+
+        var box = {halfDimensions: null, center: null};
+        box.center = lpsCenter;
+        box.halfDimensions = new THREE.Vector3(lpsBBox[3] - lpsBBox[0] + 4, lpsBBox[4] - lpsBBox[1] + 4, lpsBBox[5] - lpsBBox[2] + 4);
+
+        var intersections = VJS.Core.Intersections.rayBox(ray, box);
+        camUtils.start = intersections[0];
+        camUtils.stop = intersections[1];
+
+        c.position.set(camUtils.start.x, camUtils.start.y, camUtils.start.z);
+        c.up.set(camUtils.up.x, camUtils.up.y, camUtils.up.z);
+        c.lookAt(camUtils.stop.x, camUtils.stop.y, camUtils.stop.z);
+        c.updateProjectionMatrix();
+
+        co.target.set(camUtils.stop.x, camUtils.stop.y, camUtils.stop.z);
 
         // r.add(vol);
 
