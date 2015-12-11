@@ -259,6 +259,7 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser', 'vjs'], function(u
        r.setPixelRatio(window.devicePixelRatio);
        threeD.appendChild(r.domElement);
 
+window.console.log(window.devicePixelRatio);
        function onWindowResize() {
 
         window.console.log('resize called!');
@@ -273,7 +274,11 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser', 'vjs'], function(u
         c.updateProjectionMatrix();
 
         r.setSize(threeD.clientWidth, threeD.clientHeight);
-        window.console.log(threeD.clientHeight);
+        // var mycanvas = document.querySelector('canvas');
+        // mycanvas.style.width = threeD.clientWidth;
+        // mycanvas.style.height = 'inherit';
+        // mycanvas.height = threeD.clientHeight;
+        // window.console.log(threeD.clientHeight);
        }
 
        window.addEventListener('resize', onWindowResize, false);
@@ -282,7 +287,7 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser', 'vjs'], function(u
 
        c = new THREE.OrthographicCamera(threeD.clientWidth / -2, threeD.clientWidth / 2, threeD.clientHeight / 2, threeD.clientHeight / -2, 1, 1000);
 
-       co = new THREE.OrthographicTrackballControls(c, threeD);
+       co = new VJS.Controls.TrackballOrtho(c, threeD);
        co.staticMoving = true;
        co.noRotate = true;
 
@@ -552,7 +557,15 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser', 'vjs'], function(u
 
         co.target.set(camUtils.stop.x, camUtils.stop.y, camUtils.stop.z);
 
-        // r.add(vol);
+        // hookup scroll callback
+        co.addEventListener('OnScroll', function(e){
+          if(e.delta > 0){
+            stackHelper.index += 1;
+          }
+          else{
+            stackHelper.index -= 1;
+          }
+        });
 
       // start the rendering
       // r.render();
