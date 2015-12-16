@@ -2,11 +2,23 @@
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
+  font-family: 'Droid Sans', sans-serif !important;
+}
+
+/*overwrite jquery UI*/
+.ui-corner-all{
+   border-radius: 0px !important;
+}
+
+.ui-widget-header{
+  border:none !important;
+  background: none !important;
+  background-color: #F9F9F9 !important;
 }
 
 /*================================================= RENDERER DIV ================================================== */
 .view-renderer{
-  border: 1px solid #DDE8BB;
+  border: 1px solid #607D8B;
   height: 100%;
   width: 100%;
   overflow: hidden;
@@ -30,8 +42,8 @@
   width: calc(100% - 40px);
   overflow: hidden;
   text-overflow: ellipsis;
-  color: #633A05;
-  font-size: 12px;
+  color: #212121;
+  font-size: 14px;
   padding: 0;
 }
 
@@ -65,8 +77,8 @@
 .view-renderer-info{
   position: absolute;
   z-index: 90;
-  color: #DDE8BB;
-  font-size: 11px;
+  color: #1DE9B6;
+  font-size: 14px;
 }
 .view-renderer-info-topleft{
   top: 2px;
