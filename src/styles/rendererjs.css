@@ -2,19 +2,7 @@
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
-  font-family: 'Droid Sans', sans-serif !important;
-}
-
-/*overwrite jquery UI*/
-.ui-corner-all{
-   border-radius: 0px !important;
-}
-
-.ui-widget-header{
-  border:none !important;
-  background: none !important;
-  background-color: #F9F9F9 !important;
-  font-weight:normal!important;
+  font-family: 'Droid Sans', sans-serif;
 }
 
 /*================================================= RENDERER DIV ================================================== */
@@ -31,6 +19,9 @@
   cursor: move;
   padding: 0 10px;
   height: 30px;
+  color: #212121;
+  border-color: #F9F9F9;
+  font-weight: lighter;
 }
 
 .view-renderer-titlebar-title{
