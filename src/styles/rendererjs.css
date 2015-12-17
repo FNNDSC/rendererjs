@@ -71,6 +71,7 @@
   z-index: 90;
   color: #1DE9B6;
   font-size: 14px;
+  font-weight: lighter;
 }
 .view-renderer-info-topleft{
   top: 2px;
