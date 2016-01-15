@@ -64,6 +64,12 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
 
       // renderer status (true when the rendering failed)
       this.error = false;
+
+      // JSON object with the mri meta information if available
+      this.mriInfo = null;
+
+      // jQuery object for the info's dialog window
+      this.infoWin = null;
     };
 
     /**
@@ -124,6 +130,9 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
              '<button type="button" class="view-renderer-titlebar-buttonpane-maximize ui-dialog-titlebar-maximize" role="button" title="Maximize">' +
                '<span class="ui-icon-extlink"></span>' +
              '</button>' +
+             '<button type="button" class="view-renderer-titlebar-buttonpane-info ui-dialog-titlebar-info" role="button" title="Volume info">' +
+               '<span class="ui-icon-info"></span>' +
+             '</button>' +
            '</div>' +
          '</div>' +
 
@@ -161,7 +170,7 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
       });
 
       // buttons' event handlers
-      jqButtons.click( function(evt) {
+      jqButtons.click(function(evt) {
         var jqBtn = $(this);
 
         if (jqBtn.hasClass('view-renderer-titlebar-buttonpane-close')) {
@@ -180,9 +189,39 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
           }
 
           self.onRendererChange(evt);
+
+        } else if (jqBtn.hasClass('view-renderer-titlebar-buttonpane-info')) {
+
+          self.infoWin.dialog("open");
         }
       });
+
+      self.initInfoWindow();
      };
+
+     /**
+      * Initilize Mail window's HTML and event handlers.
+      */
+      rendererjs.Renderer.prototype.initInfoWindow = function() {
+        var self = this;
+
+        var infoWin = $('<div></div>');
+        self.infoWin = infoWin;
+
+        // convert the previous div into a floating window with a close button
+        infoWin.dialog({
+          title: "Volume info",
+          modal: true,
+          autoOpen: false,
+          minHeight: 400,
+          height: 500,
+          minWidth: 700,
+          width: 800
+        });
+
+        // add the HTML contents to the floating window
+        infoWin.append('<div class="view-renderer-infowin">No MRI meta information was provided.</div>');
+      };
 
      /**
       * Maximize the renderer's window
@@ -501,6 +540,11 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
 
          self.updateUISliceInfo();
 
+         if (info.metaHTML) {
+
+           $('.view-renderer-infowin', self.infoWin).html(info.metaHTML);
+         }
+
          // UI is ready
          if (callback) { callback(); }
        }
@@ -509,7 +553,7 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
 
          // if there is a json file then read it
          self.readJSONFile(imgFileObj.json, function(jsonObj) {
-           var mriInfo = {
+           self.mriInfo = {
              patientName: jsonObj.PatientName,
              patientId: jsonObj.PatientID,
              patientBirthDate: jsonObj.PatientBirthDate,
@@ -520,22 +564,25 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
              orientation: jsonObj.mri_info.orientation,
              primarySliceDirection: jsonObj.mri_info.primarySliceDirection,
              dimensions: jsonObj.mri_info.dimensions,
-             voxelSizes: jsonObj.mri_info.voxelSizes
+             voxelSizes: jsonObj.mri_info.voxelSizes,
+             thumbnailLabel: jsonObj.thumbnail.label,
+             thumbnailTooltip: jsonObj.thumbnail.tooltip,
+             metaHTML: jsonObj.meta.html
            };
 
-           setHTMLInfo(mriInfo);
+           setHTMLInfo(self.mriInfo);
          });
 
        } else if (imgFileObj.dicomInfo) {
 
          // if instead there is dicom information then use it
-         var mriInfo = imgFileObj.dicomInfo;
+         self.mriInfo = imgFileObj.dicomInfo;
 
-         mriInfo.dimensions = (vol.range[0]) + ' x ' + (vol.range[1]) + ' x ' + (vol.range[2]);
-         mriInfo.voxelSizes = vol.spacing[0].toPrecision(4) + ', ' + vol.spacing[1].toPrecision(4) +
+         self.mriInfo.dimensions = (vol.range[0]) + ' x ' + (vol.range[1]) + ' x ' + (vol.range[2]);
+         self.mriInfo.voxelSizes = vol.spacing[0].toPrecision(4) + ', ' + vol.spacing[1].toPrecision(4) +
          ', ' + vol.spacing[2].toPrecision(4);
 
-         setHTMLInfo(mriInfo);
+         setHTMLInfo(self.mriInfo);
 
        } else {
 
