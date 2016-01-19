@@ -55,6 +55,9 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
       // whether the renderer's window is maximized
       this.maximized = false;
 
+      // whether the renderer's window is selected
+      this.selected = false;
+
       // file manager object
       this.fileManager = null;
       if (fileManager) {this.fileManager = fileManager;}
@@ -130,6 +133,9 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
              '<button type="button" class="view-renderer-titlebar-buttonpane-maximize ui-dialog-titlebar-maximize" role="button" title="Maximize">' +
                '<span class="ui-icon-extlink"></span>' +
              '</button>' +
+             '<button type="button" class="view-renderer-titlebar-buttonpane-pin ui-dialog-titlebar-pin" role="button" title="Not selected">' +
+               '<span class="ui-icon-pin-w"></span>' +
+             '</button>' +
              '<button type="button" class="view-renderer-titlebar-buttonpane-info ui-dialog-titlebar-info" role="button" title="Volume info">' +
                '<span class="ui-icon-info"></span>' +
              '</button>' +
@@ -189,6 +195,22 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
           }
 
           self.onRendererChange(evt);
+
+        } else if (jqBtn.hasClass('view-renderer-titlebar-buttonpane-pin')) {
+
+          self.selected = !self.selected;
+
+          if (self.selected) {
+
+            jqBtn.attr('title', 'Selected');
+
+          } else{
+
+            jqBtn.attr('title', 'Not selected');
+          }
+
+          // toggle classes
+          jqBtn.find('span').toggleClass("ui-icon-pin-s ui-icon-pin-w");
 
         } else if (jqBtn.hasClass('view-renderer-titlebar-buttonpane-info')) {
 
