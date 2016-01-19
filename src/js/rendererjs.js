@@ -177,6 +177,7 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
 
       // buttons' event handlers
       jqButtons.click(function(evt) {
+
         var jqBtn = $(this);
 
         if (jqBtn.hasClass('view-renderer-titlebar-buttonpane-close')) {
@@ -204,7 +205,7 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
 
             jqBtn.attr('title', 'Selected');
 
-          } else{
+          } else {
 
             jqBtn.attr('title', 'Not selected');
           }
@@ -660,29 +661,56 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
        };
 
      /**
+      * Change renderer's orientation.
+      *
+      * @param {Function} optional callback to be called when the renderer is ready.
+      */
+      rendererjs.Renderer.prototype.changeOrientation = function(orientation, callback) {
+
+        this.orientation = orientation;
+        this._destroyRenderer();
+        this.createRenderer();
+        this.renderVolume( function() {
+
+          // renderer ready
+          if (callback) { callback(); }
+        });
+      };
+
+      /**
+       * Private method to destroy internal XTK's renderer object.
+       */
+       rendererjs.Renderer.prototype._destroyRenderer = function() {
+         var r = this.renderer;
+
+         r.remove(this.volume);
+         r.interactor.removeEventListener(X.event.events.SCROLL, this.onRenderer2DScroll);
+         r.interactor.removeEventListener(X.event.events.ZOOM, this.onRenderer2DZoom);
+         r.interactor.removeEventListener(X.event.events.PAN, this.onRenderer2DPan);
+         r.interactor.removeEventListener(X.event.events.ROTATE, this.onRenderer2DRotate);
+         r.interactor.removeEventListener("flipColumns", this.onRenderer2DFlipColumns);
+         r.interactor.removeEventListener("flipRows", this.onRenderer2DFlipRows);
+         r.removeEventListener("onPoint", this.onRenderer2DPoint);
+         r.destroy();
+
+         this.renderer = null;
+       };
+
+     /**
       * Destroy all objects and remove html interface
       */
       rendererjs.Renderer.prototype.destroy = function() {
-        var r = this.renderer;
 
-        // destroy XTK renderers
-        r.remove(this.volume);
+        // destroy XTK renderer
+        this._destroyRenderer();
+
+        // destroy XTK volume
         this.volume.destroy();
-
-        r.interactor.removeEventListener(X.event.events.SCROLL, this.onRenderer2DScroll);
-        r.interactor.removeEventListener(X.event.events.ZOOM, this.onRenderer2DZoom);
-        r.interactor.removeEventListener(X.event.events.PAN, this.onRenderer2DPan);
-        r.interactor.removeEventListener(X.event.events.ROTATE, this.onRenderer2DRotate);
-        r.interactor.removeEventListener("flipColumns", this.onRenderer2DFlipColumns);
-        r.interactor.removeEventListener("flipRows", this.onRenderer2DFlipRows);
-        r.removeEventListener("onPoint", this.onRenderer2DPoint);
-        r.destroy();
 
         // remove html
         this.container.empty();
 
         // clear objects
-        this.renderer = null;
         this.volume = null;
         this.maximized = false;
         this.fileManager = null;

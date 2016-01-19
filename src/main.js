@@ -43,7 +43,7 @@ require(['rendererjs', 'fmjs'], function(renderer, fm) {
   dirBtn.onchange = function(e) {
     var files = e.target.files;
 
-    dirBtn.disabled = true;
+    if (files.length) { dirBtn.disabled = true; }
 
     // Create a renderer. The second parameter (a file manager) is optional and only required
     // if files are going to be loaded from GDrive
@@ -61,7 +61,8 @@ require(['rendererjs', 'fmjs'], function(renderer, fm) {
       files: []
     };
 
-    if ('webkitRelativePath' in files[0]) {
+    if (files[0] && ('webkitRelativePath' in files[0])) {
+
       imgFileObj.baseUrl = files[0].webkitRelativePath;
     }
 
