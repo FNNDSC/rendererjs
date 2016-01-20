@@ -663,17 +663,23 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
      /**
       * Change renderer's orientation.
       *
-      * @param {Function} optional callback to be called when the renderer is ready.
+      * @param {String} renderer's orientation: 'X' or 'Y' or 'Z'.
       */
-      rendererjs.Renderer.prototype.changeOrientation = function(orientation, callback) {
+      rendererjs.Renderer.prototype.changeOrientation = function(orientation) {
+        var self = this;
 
-        this.orientation = orientation;
-        this._destroyRenderer();
-        this.createRenderer();
-        this.renderVolume( function() {
+        self.orientation = orientation;
+        self._destroyRenderer();
+        self.createRenderer();
+        self.renderVolume( function() {
 
           // renderer ready
-          if (callback) { callback(); }
+          var evt = {
+            type: 'orientation',
+            target: document.getElementById(self.rendererId),
+            orientation: orientation };
+
+          self.onRendererChange(evt);
         });
       };
 
