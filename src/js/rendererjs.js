@@ -199,19 +199,16 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
 
          } else if (jqBtn.hasClass('view-renderer-titlebar-buttonpane-pin')) {
 
-           self.selected = !self.selected;
-
            if (self.selected) {
 
-             jqBtn.attr('title', 'Selected');
+             self.deselect();
 
            } else {
 
-             jqBtn.attr('title', 'Not selected');
+             self.select();
            }
 
-           // toggle classes
-           jqBtn.find('span').toggleClass('ui-icon-pin-s ui-icon-pin-w');
+           self.onRendererChange(evt);
 
          } else if (jqBtn.hasClass('view-renderer-titlebar-buttonpane-info')) {
 
@@ -255,8 +252,7 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
 
     jqBtn.attr('title', 'Restore');
 
-    // toggle classes from maximize to restore
-    jqBtn.removeClass('ui-dialog-titlebar-maximize').addClass('ui-dialog-titlebar-restore');
+    // toggle icon classes from maximize to restore
     jqBtn.find('span').removeClass('ui-icon-extlink').addClass('ui-icon-newwin');
 
     // save the current renderer's dimensions
@@ -279,8 +275,7 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
 
     jqBtn.attr('title', 'Maximize');
 
-    // toggle classes from restore to maximize
-    jqBtn.removeClass('ui-dialog-titlebar-restore').addClass('ui-dialog-titlebar-maximize');
+    // toggle icon classes from restore to maximize
     jqBtn.find('span').removeClass('ui-icon-newwin').addClass('ui-icon-extlink');
 
     // style renderer
@@ -288,6 +283,36 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
 
     util.documentRepaint();
     this.maximized = false;
+  };
+
+  /**
+   * Select the renderer's window
+   */
+  rendererjs.Renderer.prototype.select = function() {
+
+    var jqBtn = $('.view-renderer-titlebar-buttonpane-pin', this.container);
+
+    jqBtn.attr('title', 'Selected');
+
+    this.selected = true;
+
+    // toggle icon classes from deselected to selected
+    jqBtn.find('span').removeClass('ui-icon-pin-w').addClass('ui-icon-pin-s');
+  };
+
+  /**
+   * Deselect the renderer's window
+   */
+  rendererjs.Renderer.prototype.deselect = function() {
+
+    var jqBtn = $('.view-renderer-titlebar-buttonpane-pin', this.container);
+
+    jqBtn.attr('title', 'Not selected');
+
+    this.selected = false;
+
+    // toggle icon classes from deselected to selected
+    jqBtn.find('span').removeClass('ui-icon-pin-s').addClass('ui-icon-pin-w');
   };
 
   /**
