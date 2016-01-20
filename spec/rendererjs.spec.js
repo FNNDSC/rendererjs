@@ -23,7 +23,7 @@ define(['rendererjs'], function(rendererjs) {
     });
 
     it('rendererjs.Renderer.prototype.getVolProps("Z") returns 2',
-      function () {
+      function() {
         expect(r.getVolProps('Z').rangeInd).toEqual(2);
       }
     );
