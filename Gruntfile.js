@@ -18,9 +18,9 @@ module.exports = function(grunt) {
     testFiles: ['spec/*.spec.js'], // test files (jasmine specs)
 
     // Task configuration.
-    jscs: { // check javascript syntax and errors
+    jscs: { // check javascript style
       options: {
-        config: '.jscsrc',
+        config: '.jscsrc',  // configuration file
         fix: true,
         force: true
       },
@@ -37,23 +37,7 @@ module.exports = function(grunt) {
 
     jshint: { // check javascript syntax and errors
       options: {
-        curly: true,
-        eqeqeq: true,
-        immed: true,
-        latedef: true,
-        newcap: true,
-        noarg: true,
-        sub: true,
-        undef: true,
-        unused: true,
-        boss: true,
-        eqnull: true,
-        browser: true,
-        globals: {
-          jQuery: true, $: true, X: true, dicomParser: true, console: true, alert: true,
-          require: true, describe: true, it: true, expect: true, beforeEach: true,
-          afterEach: true, define: true
-        }
+        jshintrc: true // configuration file
       },
       source: {
         src: '<%= jscs.source.src %>'
