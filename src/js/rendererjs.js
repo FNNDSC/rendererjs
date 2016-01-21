@@ -3,7 +3,7 @@
  */
 
 // define a new module
-define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, jszip) {
+define(['utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'lossless','xtk', 'dicomParser'], function(util, jszip) {
 
   /**
    * Provide a namespace for the renderer module
