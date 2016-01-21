@@ -113,135 +113,135 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
    * Create and initialize the renderer's HTML UI.
    */
   rendererjs.Renderer.prototype.createUI = function() {
-       var self = this;
+     var self = this;
 
-       var url = self.imgFileObj.baseUrl + self.imgFileObj.files[0].name;
+     var url = self.imgFileObj.baseUrl + self.imgFileObj.files[0].name;
 
-       // add the appropriate classes to the renderer container
-       self.container.addClass('view-renderer');
+     // add the appropriate classes to the renderer container
+     self.container.addClass('view-renderer');
 
-       // append html interface to the renderer's container
-       self.container.append(
+     // append html interface to the renderer's container
+     self.container.append(
 
-         // title bar
-         '<div class="view-renderer-titlebar ui-dialog-titlebar ui-widget-header ui-corner-all">' +
-           '<span class="view-renderer-titlebar-title">' + url + '</span>' +
-           '<div class="view-renderer-titlebar-buttonpane">' +
-             '<button type="button" class="view-renderer-titlebar-buttonpane-close ui-dialog-titlebar-close" role="button" title="Close">' +
-               '<span class="ui-icon-closethick"></span>' +
-             '</button>' +
-             '<button type="button" class="view-renderer-titlebar-buttonpane-maximize ui-dialog-titlebar-maximize" role="button" title="Maximize">' +
-               '<span class="ui-icon-extlink"></span>' +
-             '</button>' +
-             '<button type="button" class="view-renderer-titlebar-buttonpane-pin ui-dialog-titlebar-pin" role="button" title="Not selected">' +
-               '<span class="ui-icon-pin-w"></span>' +
-             '</button>' +
-             '<button type="button" class="view-renderer-titlebar-buttonpane-info ui-dialog-titlebar-info" role="button" title="Volume info">' +
-               '<span class="ui-icon-info"></span>' +
-             '</button>' +
-           '</div>' +
+       // title bar
+       '<div class="view-renderer-titlebar ui-dialog-titlebar ui-widget-header ui-corner-all">' +
+         '<span class="view-renderer-titlebar-title">' + url + '</span>' +
+         '<div class="view-renderer-titlebar-buttonpane">' +
+           '<button type="button" class="view-renderer-titlebar-buttonpane-close ui-dialog-titlebar-close" role="button" title="Close">' +
+             '<span class="ui-icon-closethick"></span>' +
+           '</button>' +
+           '<button type="button" class="view-renderer-titlebar-buttonpane-maximize ui-dialog-titlebar-maximize" role="button" title="Maximize">' +
+             '<span class="ui-icon-extlink"></span>' +
+           '</button>' +
+           '<button type="button" class="view-renderer-titlebar-buttonpane-pin ui-dialog-titlebar-pin" role="button" title="Not selected">' +
+             '<span class="ui-icon-pin-w"></span>' +
+           '</button>' +
+           '<button type="button" class="view-renderer-titlebar-buttonpane-info ui-dialog-titlebar-info" role="button" title="Volume info">' +
+             '<span class="ui-icon-info"></span>' +
+           '</button>' +
          '</div>' +
+       '</div>' +
 
-         // content space
-         '<div id="' + self.rendererId + '" class="view-renderer-content">' +
-           '<div class="view-renderer-info view-renderer-info-topleft"></div>' +
-           '<div class="view-renderer-info view-renderer-info-topright"></div>' +
-           '<div class="view-renderer-info view-renderer-info-bottomright"></div>' +
-           '<div class="view-renderer-info view-renderer-info-bottomleft"></div>' +
-         '</div>'
-      );
+       // content space
+       '<div id="' + self.rendererId + '" class="view-renderer-content">' +
+         '<div class="view-renderer-info view-renderer-info-topleft"></div>' +
+         '<div class="view-renderer-info view-renderer-info-topright"></div>' +
+         '<div class="view-renderer-info view-renderer-info-bottomright"></div>' +
+         '<div class="view-renderer-info view-renderer-info-bottomleft"></div>' +
+       '</div>'
+    );
 
-       // add the appropriate classes to the title bar elements
+     // add the appropriate classes to the title bar elements
 
-       var jqButtons = $('button', self.container);
+     var jqButtons = $('button', self.container);
 
-       jqButtons.addClass('ui-button ui-widget ui-state-default ui-corner-all');
-       $('span', jqButtons).addClass('ui-button-icon-primary ui-icon');
+     jqButtons.addClass('ui-button ui-widget ui-state-default ui-corner-all');
+     $('span', jqButtons).addClass('ui-button-icon-primary ui-icon');
 
-       jqButtons.mouseover(function() {
+     jqButtons.mouseover(function() {
 
-         return $(this).addClass('ui-state-hover');
+       return $(this).addClass('ui-state-hover');
 
-       }).mouseout(function() {
+     }).mouseout(function() {
 
-         return $(this).removeClass('ui-state-hover');
+       return $(this).removeClass('ui-state-hover');
 
-       }).focus(function() {
+     }).focus(function() {
 
-         return $(this).addClass('ui-state-focus');
+       return $(this).addClass('ui-state-focus');
 
-       }).blur(function() {
+     }).blur(function() {
 
-         return $(this).removeClass('ui-state-focus');
-       });
+       return $(this).removeClass('ui-state-focus');
+     });
 
-       // buttons' event handlers
-       jqButtons.click(function(evt) {
+     // buttons' event handlers
+     jqButtons.click(function(evt) {
 
-         var jqBtn = $(this);
+       var jqBtn = $(this);
 
-         if (jqBtn.hasClass('view-renderer-titlebar-buttonpane-close')) {
+       if (jqBtn.hasClass('view-renderer-titlebar-buttonpane-close')) {
 
-           self.onRendererClose(evt);
+         self.onRendererClose(evt);
 
-         } else if (jqBtn.hasClass('view-renderer-titlebar-buttonpane-maximize')) {
+       } else if (jqBtn.hasClass('view-renderer-titlebar-buttonpane-maximize')) {
 
-           if (self.maximized) {
+         if (self.maximized) {
 
-             self.restore();
+           self.restore();
 
-           } else {
+         } else {
 
-             self.maximize();
-           }
-
-           self.onRendererChange(evt);
-
-         } else if (jqBtn.hasClass('view-renderer-titlebar-buttonpane-pin')) {
-
-           if (self.selected) {
-
-             self.deselect();
-
-           } else {
-
-             self.select();
-           }
-
-           self.onRendererChange(evt);
-
-         } else if (jqBtn.hasClass('view-renderer-titlebar-buttonpane-info')) {
-
-           self.infoWin.dialog('open');
+           self.maximize();
          }
-       });
 
-       self.initInfoWindow();
-     };
+         self.onRendererChange(evt);
+
+       } else if (jqBtn.hasClass('view-renderer-titlebar-buttonpane-pin')) {
+
+         if (self.selected) {
+
+           self.deselect();
+
+         } else {
+
+           self.select();
+         }
+
+         self.onRendererChange(evt);
+
+       } else if (jqBtn.hasClass('view-renderer-titlebar-buttonpane-info')) {
+
+         self.infoWin.dialog('open');
+       }
+     });
+
+     self.initInfoWindow();
+   };
 
   /**
    * Initilize Mail window's HTML and event handlers.
    */
   rendererjs.Renderer.prototype.initInfoWindow = function() {
-        var self = this;
+    var self = this;
 
-        var infoWin = $('<div></div>');
-        self.infoWin = infoWin;
+    var infoWin = $('<div></div>');
+    self.infoWin = infoWin;
 
-        // convert the previous div into a floating window with a close button
-        infoWin.dialog({
-          title: 'Volume info',
-          modal: true,
-          autoOpen: false,
-          minHeight: 400,
-          height: 500,
-          minWidth: 700,
-          width: 800
-        });
+    // convert the previous div into a floating window with a close button
+    infoWin.dialog({
+      title: 'Volume info',
+      modal: true,
+      autoOpen: false,
+      minHeight: 400,
+      height: 500,
+      minWidth: 700,
+      width: 800
+    });
 
-        // add the HTML contents to the floating window
-        infoWin.append('<div class="view-renderer-infowin">No MRI meta information was provided.</div>');
-      };
+    // add the HTML contents to the floating window
+    infoWin.append('<div class="view-renderer-infowin">No MRI meta information was provided.</div>');
+  };
 
   /**
    * Maximize the renderer's window
@@ -548,99 +548,102 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
    * @param {Function} optional callback to be called when the UI is ready.
    */
   rendererjs.Renderer.prototype.setUIMriInfo = function(callback) {
-       var self = this;
+    var self = this;
 
-       var imgFileObj = self.imgFileObj;
-       var vol = self.volume;
+    var imgFileObj = self.imgFileObj;
+    var vol = self.volume;
 
-       function setHTMLInfo(info) {
-         var jqR = self.container;
-         var age = '', orient = '', direct = '';
+    function setHTMLInfo(info) {
+      var jqR = self.container;
+      var age = '', orient = '', direct = '';
 
-         if (info.patientAge) {
-           age =  'AGE: ' + info.patientAge + '<br>';
-         }
+      if (info.patientAge) {
+        age =  'AGE: ' + info.patientAge + '<br>';
+      }
 
-         $('.view-renderer-info-topleft', jqR).html(
-           info.patientName + '<br>' +
-           info.patientId + '<br>' +
-           'BIRTHDATE: ' + info.patientBirthDate + '<br>' +
-           age +
-           'SEX: ' + info.patientSex);
+      $('.view-renderer-info-topleft', jqR).html(
+        info.patientName + '<br>' +
+        info.patientId + '<br>' +
+        'BIRTHDATE: ' + info.patientBirthDate + '<br>' +
+        age +
+        'SEX: ' + info.patientSex
+      );
 
-         $('.view-renderer-info-topright', jqR).html(
-           'SERIES: ' + info.seriesDescription + '<br>' +
-           info.manufacturer + '<br>' +
-           info.studyDate + '<br>' +
-           info.dimensions + '<br>' +
-           info.voxelSizes);
+      $('.view-renderer-info-topright', jqR).html(
+        'SERIES: ' + info.seriesDescription + '<br>' +
+        info.manufacturer + '<br>' +
+        info.studyDate + '<br>' +
+        info.dimensions + '<br>' +
+        info.voxelSizes
+      );
 
-         if (info.orientation) {
-           orient = info.orientation + '<br>';
-         }
+      if (info.orientation) {
+        orient = info.orientation + '<br>';
+      }
 
-         if (info.primarySliceDirection) {
-           direct = info.primarySliceDirection;
-         }
+      if (info.primarySliceDirection) {
+        direct = info.primarySliceDirection;
+      }
 
-         $('.view-renderer-info-bottomright', jqR).html(
-           orient + direct);
+      $('.view-renderer-info-bottomright', jqR).html(
+        orient + direct
+      );
 
-         self.updateUISliceInfo();
+      self.updateUISliceInfo();
 
-         if (info.metaHTML) {
+      if (info.metaHTML) {
 
-           $('.view-renderer-infowin', self.infoWin).html(info.metaHTML);
-         }
+        $('.view-renderer-infowin', self.infoWin).html(info.metaHTML);
+      }
 
-         // UI is ready
-         if (callback) { callback(); }
-       }
+      // UI is ready
+      if (callback) { callback(); }
+    }
 
-       if (imgFileObj.json) {
+    if (imgFileObj.json) {
 
-         // if there is a json file then read it
-         self.readJSONFile(imgFileObj.json, function(jsonObj) {
-           self.mriInfo = {
-             patientName: jsonObj.PatientName,
-             patientId: jsonObj.PatientID,
-             patientBirthDate: jsonObj.PatientBirthDate,
-             patientSex: jsonObj.PatientSex,
-             seriesDescription: jsonObj.SeriesDescription,
-             manufacturer: jsonObj.Manufacturer,
-             studyDate: jsonObj.StudyDate,
-             orientation: jsonObj.mri_info.orientation,
-             primarySliceDirection: jsonObj.mri_info.primarySliceDirection,
-             dimensions: jsonObj.mri_info.dimensions,
-             voxelSizes: jsonObj.mri_info.voxelSizes,
-             thumbnailLabel: jsonObj.thumbnail.label,
-             thumbnailTooltip: jsonObj.thumbnail.tooltip,
-             metaHTML: jsonObj.meta.html
-           };
+      // if there is a json file then read it
+      self.readJSONFile(imgFileObj.json, function(jsonObj) {
+        self.mriInfo = {
+          patientName: jsonObj.PatientName,
+          patientId: jsonObj.PatientID,
+          patientBirthDate: jsonObj.PatientBirthDate,
+          patientSex: jsonObj.PatientSex,
+          seriesDescription: jsonObj.SeriesDescription,
+          manufacturer: jsonObj.Manufacturer,
+          studyDate: jsonObj.StudyDate,
+          orientation: jsonObj.mri_info.orientation,
+          primarySliceDirection: jsonObj.mri_info.primarySliceDirection,
+          dimensions: jsonObj.mri_info.dimensions,
+          voxelSizes: jsonObj.mri_info.voxelSizes,
+          thumbnailLabel: jsonObj.thumbnail.label,
+          thumbnailTooltip: jsonObj.thumbnail.tooltip,
+          metaHTML: jsonObj.meta.html
+        };
 
-           setHTMLInfo(self.mriInfo);
-         });
+        setHTMLInfo(self.mriInfo);
+      });
 
-       } else if (imgFileObj.dicomInfo) {
+    } else if (imgFileObj.dicomInfo) {
 
-         // if instead there is dicom information then use it
-         self.mriInfo = imgFileObj.dicomInfo;
+      // if instead there is dicom information then use it
+      self.mriInfo = imgFileObj.dicomInfo;
 
-         self.mriInfo.dimensions = (vol.range[0]) + ' x ' + (vol.range[1]) + ' x ' + (vol.range[2]);
-         self.mriInfo.voxelSizes = vol.spacing[0].toPrecision(4) + ', ' + vol.spacing[1].toPrecision(4) +
-         ', ' + vol.spacing[2].toPrecision(4);
+      self.mriInfo.dimensions = (vol.range[0]) + ' x ' + (vol.range[1]) + ' x ' + (vol.range[2]);
+      self.mriInfo.voxelSizes = vol.spacing[0].toPrecision(4) + ', ' + vol.spacing[1].toPrecision(4) +
+      ', ' + vol.spacing[2].toPrecision(4);
 
-         setHTMLInfo(self.mriInfo);
+      setHTMLInfo(self.mriInfo);
 
-       } else {
+    } else {
 
-         // just display slice number
-         self.updateUISliceInfo();
+      // just display slice number
+      self.updateUISliceInfo();
 
-         // UI is ready
-         if (callback) { callback(); }
-       }
-     };
+      // UI is ready
+      if (callback) { callback(); }
+    }
+  };
 
   /**
    * Generate a thumbnail's image data from a snapshot of the internal canvas.
@@ -689,43 +692,39 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
    * Change renderer's orientation.
    *
    * @param {String} renderer's orientation: 'X' or 'Y' or 'Z'.
+   * @param {Function} optional callback to be called when the renderer is ready.
    */
-  rendererjs.Renderer.prototype.changeOrientation = function(orientation) {
-        var self = this;
+  rendererjs.Renderer.prototype.changeOrientation = function(orientation, callback) {
+    var self = this;
 
-        self.orientation = orientation;
-        self._destroyRenderer();
-        self.createRenderer();
-        self.renderVolume(function() {
+    self.orientation = orientation;
+    self._destroyRenderer();
+    self.createRenderer();
+    self.renderVolume(function() {
 
-          // renderer ready
-          var evt = {
-            type: 'orientation',
-            target: document.getElementById(self.rendererId),
-            orientation: orientation};
-
-          self.onRendererChange(evt);
-        });
-      };
+      // renderer ready
+      if (callback) { callback(); }
+    });
+  };
 
   /**
    * Private method to destroy internal XTK's renderer object.
    */
   rendererjs.Renderer.prototype._destroyRenderer = function() {
-         var r = this.renderer;
+    var r = this.renderer;
 
-         r.remove(this.volume);
-         r.interactor.removeEventListener(X.event.events.SCROLL, this.onRenderer2DScroll);
-         r.interactor.removeEventListener(X.event.events.ZOOM, this.onRenderer2DZoom);
-         r.interactor.removeEventListener(X.event.events.PAN, this.onRenderer2DPan);
-         r.interactor.removeEventListener(X.event.events.ROTATE, this.onRenderer2DRotate);
-         r.interactor.removeEventListener('flipColumns', this.onRenderer2DFlipColumns);
-         r.interactor.removeEventListener('flipRows', this.onRenderer2DFlipRows);
-         r.removeEventListener('onPoint', this.onRenderer2DPoint);
-         r.destroy();
+    r.remove(this.volume);
+    r.interactor.removeEventListener(X.event.events.SCROLL, this.onRenderer2DScroll);
+    r.interactor.removeEventListener(X.event.events.ZOOM, this.onRenderer2DZoom);
+    r.interactor.removeEventListener(X.event.events.PAN, this.onRenderer2DPan);
+    r.interactor.removeEventListener(X.event.events.ROTATE, this.onRenderer2DRotate);
+    r.interactor.removeEventListener('flipColumns', this.onRenderer2DFlipColumns);
+    r.interactor.removeEventListener('flipRows', this.onRenderer2DFlipRows);
+    r.removeEventListener('onPoint', this.onRenderer2DPoint);
+    r.destroy();
 
-         this.renderer = null;
-       };
+    this.renderer = null;
+  };
 
   /**
    * Destroy all objects and remove html interface
@@ -754,68 +753,68 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
    * @param {Function} callback to be called when all volume files have been read.
    */
   rendererjs.Renderer.prototype.readVolumeFiles = function(callback) {
-        var self = this;
+    var self = this;
 
-        var imgFileObj = self.imgFileObj;
-        var vol = self.volume;
-        var numFiles = 0;
-        var filedata = [];
+    var imgFileObj = self.imgFileObj;
+    var vol = self.volume;
+    var numFiles = 0;
+    var filedata = [];
 
-        // function to read a single volume file
-        function readFile(file, ix) {
+    // function to read a single volume file
+    function readFile(file, ix) {
 
-          self.readFile(file, 'readAsArrayBuffer', function(data) {
-            filedata[ix] = data;
-            ++numFiles;
+      self.readFile(file, 'readAsArrayBuffer', function(data) {
+        filedata[ix] = data;
+        ++numFiles;
 
-            if (numFiles === imgFileObj.files.length) {
+        if (numFiles === imgFileObj.files.length) {
 
-              if (imgFileObj.imgType === 'dicom' || imgFileObj.imgType === 'dicomzip') {
+          if (imgFileObj.imgType === 'dicom' || imgFileObj.imgType === 'dicomzip') {
 
-                // if the files are zip files of dicoms then unzip them and sort the resultant files
-                if (imgFileObj.imgType === 'dicomzip') {
-                  var fDataArr = [];
+            // if the files are zip files of dicoms then unzip them and sort the resultant files
+            if (imgFileObj.imgType === 'dicomzip') {
+              var fDataArr = [];
 
-                  for (var i = 0; i < filedata.length; i++) {
-                    fDataArr = fDataArr.concat(self.unzipFileData(filedata[i]));
-                  }
-
-                  fDataArr = util.sortObjArr(fDataArr, 'name');
-
-                  filedata = [];
-                  var urls = [];
-
-                  for (i = 0; i < fDataArr.length; i++) {
-
-                    filedata.push(fDataArr[i].data);
-                    urls.push(imgFileObj.baseUrl + fDataArr[i].name);
-                  }
-
-                  vol.file = urls;
-                }
-
-                try {
-
-                  imgFileObj.dicomInfo = rendererjs.Renderer.parseDicom(filedata[0]);
-
-                } catch (err) {
-
-                  console.log('Could not parse dicom ' + imgFileObj.baseUrl + ' Error - ' + err);
-                }
+              for (var i = 0; i < filedata.length; i++) {
+                fDataArr = fDataArr.concat(self.unzipFileData(filedata[i]));
               }
 
-              vol.filedata = filedata;
-              callback();
+              fDataArr = util.sortObjArr(fDataArr, 'name');
+
+              filedata = [];
+              var urls = [];
+
+              for (i = 0; i < fDataArr.length; i++) {
+
+                filedata.push(fDataArr[i].data);
+                urls.push(imgFileObj.baseUrl + fDataArr[i].name);
+              }
+
+              vol.file = urls;
             }
-          });
-        }
 
-        // read all neuroimage files in imgFileObj.files
-        for (var i = 0; i < imgFileObj.files.length; i++) {
+            try {
 
-          readFile(imgFileObj.files[i], i);
+              imgFileObj.dicomInfo = rendererjs.Renderer.parseDicom(filedata[0]);
+
+            } catch (err) {
+
+              console.log('Could not parse dicom ' + imgFileObj.baseUrl + ' Error - ' + err);
+            }
+          }
+
+          vol.filedata = filedata;
+          callback();
         }
-      };
+      });
+    }
+
+    // read all neuroimage files in imgFileObj.files
+    for (var i = 0; i < imgFileObj.files.length; i++) {
+
+      readFile(imgFileObj.files[i], i);
+    }
+  };
 
   /**
    * Read a local or remote JSON file.
@@ -845,48 +844,48 @@ define(['utiljs', 'jszip', 'jquery_ui', 'xtk', 'dicomParser'], function(util, js
    * @param {Function} callback whose argument is the file data.
    */
   rendererjs.Renderer.prototype.readFile = function(file, readingMethod, callback) {
-      var self = this;
+    var self = this;
 
-      var reader = new FileReader();
+    var reader = new FileReader();
 
-      reader.onload = function() {
-        callback(reader.result);
-      };
+    reader.onload = function() {
+      callback(reader.result);
+    };
 
-      if (file.remote) {
+    if (file.remote) {
 
-        // the file is in a remote storage
-        if (file.cloudId) {
+      // the file is in a remote storage
+      if (file.cloudId) {
 
-          // the file is in the cloud
-          if (self.fileManager) {
+        // the file is in the cloud
+        if (self.fileManager) {
 
-            // reading files from the cloud was enabled
-            self.fileManager.getFileBlob(file.cloudId, function(blob) {
-
-              reader[readingMethod](blob);
-            });
-
-          } else {
-
-            console.error('No file manager found. Reading files from cloud was not enabled');
-          }
-
-        } else {
-
-          // the file is in a remote backend
-          util.urlToBlob(file.url, function(blob) {
+          // reading files from the cloud was enabled
+          self.fileManager.getFileBlob(file.cloudId, function(blob) {
 
             reader[readingMethod](blob);
           });
+
+        } else {
+
+          console.error('No file manager found. Reading files from cloud was not enabled');
         }
 
       } else {
 
-        // read the file locally
-        reader[readingMethod](file);
+        // the file is in a remote backend
+        util.urlToBlob(file.url, function(blob) {
+
+          reader[readingMethod](blob);
+        });
       }
-    };
+
+    } else {
+
+      // read the file locally
+      reader[readingMethod](file);
+    }
+  };
 
   /**
    * Zip the contents of several files into a few zip file contents. Maximum size for
