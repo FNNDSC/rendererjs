@@ -13,6 +13,7 @@ require.config({
     jquery: ['https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min', 'jquery/dist/jquery.min'],
     jquery_ui: ['https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min', 'jquery-ui/jquery-ui.min'],
     gapi: 'https://apis.google.com/js/api',
+    text: 'text/text',
     jszip: 'jszip/dist/jszip',
     dicomParser: 'dicomParser/dist/dicomParser.min',
     xtk: '../lib/xtk',
@@ -21,12 +22,14 @@ require.config({
     jpx: '../lib/jpx',
     utiljs: 'utiljs/src/js/utiljs',
     fmjs: 'fmjs/src/js/fmjs',
+    rendererwin: '../../templates/rendererwin.html',
     rendererjs: '../rendererjs'
   }
 });
 
 
 require(['rendererjs', 'fmjs'], function(renderer, fm) {
+
   // Entry point
 
   // Create a file manager object (optional)
@@ -40,10 +43,19 @@ require(['rendererjs', 'fmjs'], function(renderer, fm) {
     orientation: 'Z'
   };
 
+
   // Event handler for the directory loader button
   var dirBtn = document.getElementById('dirbtn');
 
+  var destroyRenderer = function(r) {
+
+    r.destroy();
+    $('#thumbnail').css('display', 'none');
+    dirBtn.disabled = false;
+  };
+
   dirBtn.onchange = function(e) {
+
     var files = e.target.files;
 
     if (files.length) { dirBtn.disabled = true; }
@@ -56,7 +68,23 @@ require(['rendererjs', 'fmjs'], function(renderer, fm) {
     r.onRendererClose = function () {
 
       destroyRenderer(r);
-    }
+    };
+
+    var initCallback = function() {
+
+      if (r.error) {
+
+        destroyRenderer(r);
+
+      } else {
+
+        r.getThumbnail( function(thData) {
+
+          $('#thumbnail').css('display', 'block');
+          $('img').attr('src', thData);
+        });
+      }
+    };
 
     // Image file object
     var imgFileObj = {
@@ -97,32 +125,11 @@ require(['rendererjs', 'fmjs'], function(renderer, fm) {
         }
 
         // initialize the renderer
-        r.init(imgFileObj, function() {
-
-          if (r.error) {
-
-            destroyRenderer(r);
-
-          } else {
-
-            r.getThumbnail(function(thData) {
-
-              $('#thumbnail').css('display', 'block');
-              img = $('img').attr('src', thData);
-            });
-          }
-        });
+        r.init(imgFileObj, initCallback);
 
         break;
       }
     }
   };
 
-
-  function destroyRenderer(r) {
-
-    r.destroy();
-    $('#thumbnail').css('display', 'none');
-    dirBtn.disabled = false;
-  }
 });

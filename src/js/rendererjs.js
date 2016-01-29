@@ -3,95 +3,97 @@
  */
 
 // define a new module
-define(['utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'lossless','xtk', 'dicomParser'], function(util, jszip) {
+define(['text!rendererwin', 'utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'lossless',
 
-  /**
-   * Provide a namespace for the renderer module
-   *
-   * @namespace
-   */
-  var rendererjs = rendererjs || {};
+  'xtk', 'dicomParser'], function(rendererwin, util, jszip) {
 
-  /**
-   * Class implementing the renderer window
-   *
-   * @constructor
-   * @param {Object} renderer options object with properties:
-   *  -container: renderer's container's DOM id or renderer's container's DOM object
-   *  -rendererId: a DOM id for the XTK renderer object
-   *  -orientation: renderer's orientation, either of the strings: 'X', 'Y' or 'Z'
-   * @param {Object} optional file manager object to enable reading of files from the cloud or HTML5
-   * sandboxed filesystem.
-   */
-  rendererjs.Renderer = function(options, fileManager) {
+    /**
+     * Provide a namespace for the renderer module
+     *
+     * @namespace
+     */
+    var rendererjs = rendererjs || {};
 
-    this.version = 0.0;
+    /**
+     * Class implementing the renderer window
+     *
+     * @constructor
+     * @param {Object} renderer options object with properties:
+     *  -container: renderer's container's DOM id or renderer's container's DOM object
+     *  -rendererId: a DOM id for the XTK renderer object
+     *  -orientation: renderer's orientation, either of the strings: 'X', 'Y' or 'Z'
+     * @param {Object} optional file manager object to enable reading of files from the cloud or HTML5
+     * sandboxed filesystem.
+     */
+    rendererjs.Renderer = function(options, fileManager) {
 
-    // renderer's container
-    if (typeof options.container === 'string') {
+      this.version = 0.0;
 
-      // a DOM id was passed
-      this.container = $('#' + options.container);
+      // renderer's container
+      if (typeof options.container === 'string') {
 
-    } else {
+        // a DOM id was passed
+        this.container = $('#' + options.container);
 
-      // a DOM object was passed
-      this.container = $(options.container);
-    }
+      } else {
 
-    // XTK renderer's container id
-    this.rendererId = options.rendererId;
+        // a DOM object was passed
+        this.container = $(options.container);
+      }
 
-    // renderer's orientation
-    this.orientation = 'Z';
-    if (options.orientation) {this.orientation = options.orientation;}
+      // XTK renderer's container id
+      this.rendererId = options.rendererId;
 
-    // xtk renderer object
-    this.renderer = null;
+      // renderer's orientation
+      this.orientation = 'Z';
+      if (options.orientation) {this.orientation = options.orientation;}
 
-    // xtk volume object
-    this.volume = null;
+      // xtk renderer object
+      this.renderer = null;
 
-    // whether the renderer's window is maximized
-    this.maximized = false;
+      // xtk volume object
+      this.volume = null;
 
-    // whether the renderer's window is selected
-    this.selected = false;
+      // whether the renderer's window is maximized
+      this.maximized = false;
 
-    // file manager object
-    this.fileManager = null;
-    if (fileManager) {this.fileManager = fileManager;}
+      // whether the renderer's window is selected
+      this.selected = false;
 
-    // associated image file object
-    this.imgFileObj = null;
+      // file manager object
+      this.fileManager = null;
+      if (fileManager) {this.fileManager = fileManager;}
 
-    // renderer status (true when the rendering failed)
-    this.error = false;
+      // associated image file object
+      this.imgFileObj = null;
 
-    // JSON object with the mri meta information if available
-    this.mriInfo = null;
+      // renderer status (true when the rendering failed)
+      this.error = false;
 
-    // jQuery object for the info's dialog window
-    this.infoWin = null;
-  };
+      // JSON object with the mri meta information if available
+      this.mriInfo = null;
 
-  /**
-   * Initialize the renderer.
-   *
-   * @param {Object} image file object with the following properties:
-   *  -baseUrl: String ‘directory/containing/the/files’.
-   *  -imgType: String neuroimage type. Any of the possible values returned by rendererjs.Renderer.imgType
-   *  -files: Array of HTML5 File objects or custom file objects with properties:
-   *     -remote: a boolean indicating whether the file has not been read locally (with a filepicker)
-   *     -url the file's url
-   *     -cloudId: the id of the file in a cloud storage system if stored in the cloud
-   *     -name: file name
-   *  The files array contains a single file for imgType different from 'dicom' or 'dicomzip'
-   *  -json: Optional HTML5 or custom File object (optional json file with the mri info for imgType different from 'dicom')
-   * @param {Function} optional callback to be called when the renderer is ready. If the rendering failed then the
-   * renderer's error property is set to true.
-   */
-  rendererjs.Renderer.prototype.init = function(imgFileObj, callback) {
+      // jQuery object for the info's dialog window
+      this.infoWin = null;
+    };
+
+    /**
+     * Initialize the renderer.
+     *
+     * @param {Object} image file object with the following properties:
+     *  -baseUrl: String ‘directory/containing/the/files’.
+     *  -imgType: String neuroimage type. Any of the possible values returned by rendererjs.Renderer.imgType
+     *  -files: Array of HTML5 File objects or custom file objects with properties:
+     *     -remote: a boolean indicating whether the file has not been read locally (with a filepicker)
+     *     -url the file's url
+     *     -cloudId: the id of the file in a cloud storage system if stored in the cloud
+     *     -name: file name
+     *  The files array contains a single file for imgType different from 'dicom' or 'dicomzip'
+     *  -json: Optional HTML5 or custom File object (optional json file with the mri info for imgType different from 'dicom')
+     * @param {Function} optional callback to be called when the renderer is ready. If the rendering failed then the
+     * renderer's error property is set to true.
+     */
+    rendererjs.Renderer.prototype.init = function(imgFileObj, callback) {
     var self = this;
 
     self.imgFileObj = imgFileObj;
@@ -109,10 +111,10 @@ define(['utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'lossless','xtk', 'dic
     });
   };
 
-  /**
-   * Create and initialize the renderer's HTML UI.
-   */
-  rendererjs.Renderer.prototype.createUI = function() {
+    /**
+     * Create and initialize the renderer's HTML UI.
+     */
+    rendererjs.Renderer.prototype.createUI = function() {
      var self = this;
 
      var url = self.imgFileObj.baseUrl + self.imgFileObj.files[0].name;
@@ -120,39 +122,18 @@ define(['utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'lossless','xtk', 'dic
      // add the appropriate classes to the renderer container
      self.container.addClass('view-renderer');
 
-     // append html interface to the renderer's container
-     self.container.append(
+     // append template html interface to the renderer's container
+     var template = $(rendererwin);
+     self.container.append(template.filter('.view-renderer-titlebar'));
+     self.container.append(template.filter('.view-renderer-content'));
 
-       // title bar
-       '<div class="view-renderer-titlebar ui-dialog-titlebar ui-widget-header ui-corner-all">' +
-         '<span class="view-renderer-titlebar-title">' + url + '</span>' +
-         '<div class="view-renderer-titlebar-buttonpane">' +
-           '<button type="button" class="view-renderer-titlebar-buttonpane-close ui-dialog-titlebar-close" role="button" title="Close">' +
-             '<span class="ui-icon-closethick"></span>' +
-           '</button>' +
-           '<button type="button" class="view-renderer-titlebar-buttonpane-maximize ui-dialog-titlebar-maximize" role="button" title="Maximize">' +
-             '<span class="ui-icon-extlink"></span>' +
-           '</button>' +
-           '<button type="button" class="view-renderer-titlebar-buttonpane-pin ui-dialog-titlebar-pin" role="button" title="Not selected">' +
-             '<span class="ui-icon-pin-w"></span>' +
-           '</button>' +
-           '<button type="button" class="view-renderer-titlebar-buttonpane-info ui-dialog-titlebar-info" role="button" title="Volume info">' +
-             '<span class="ui-icon-info"></span>' +
-           '</button>' +
-         '</div>' +
-       '</div>' +
+     // set content div's id
+     $('.view-renderer-content', self.container).attr('id', self.rendererId);
 
-       // content space
-       '<div id="' + self.rendererId + '" class="view-renderer-content">' +
-         '<div class="view-renderer-info view-renderer-info-topleft"></div>' +
-         '<div class="view-renderer-info view-renderer-info-topright"></div>' +
-         '<div class="view-renderer-info view-renderer-info-bottomright"></div>' +
-         '<div class="view-renderer-info view-renderer-info-bottomleft"></div>' +
-       '</div>'
-    );
+     // set title's bar caption
+     $('.view-renderer-titlebar-title', self.container).text(url);
 
      // add the appropriate classes to the title bar elements
-
      var jqButtons = $('button', self.container);
 
      jqButtons.addClass('ui-button ui-widget ui-state-default ui-corner-all');
@@ -219,10 +200,10 @@ define(['utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'lossless','xtk', 'dic
      self.initInfoWindow();
    };
 
-  /**
-   * Initilize Mail window's HTML and event handlers.
-   */
-  rendererjs.Renderer.prototype.initInfoWindow = function() {
+    /**
+     * Initilize Mail window's HTML and event handlers.
+     */
+    rendererjs.Renderer.prototype.initInfoWindow = function() {
     var self = this;
 
     var infoWin = $('<div></div>');
@@ -243,107 +224,107 @@ define(['utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'lossless','xtk', 'dic
     infoWin.append('<div class="view-renderer-infowin">No MRI meta information was provided.</div>');
   };
 
-  /**
-   * Maximize the renderer's window
-   */
-  rendererjs.Renderer.prototype.maximize = function() {
+    /**
+     * Maximize the renderer's window
+     */
+    rendererjs.Renderer.prototype.maximize = function() {
 
-    var jqBtn = $('.view-renderer-titlebar-buttonpane-maximize', this.container);
+      var jqBtn = $('.view-renderer-titlebar-buttonpane-maximize', this.container);
 
-    jqBtn.attr('title', 'Restore');
+      jqBtn.attr('title', 'Restore');
 
-    // toggle icon classes from maximize to restore
-    jqBtn.find('span').removeClass('ui-icon-extlink').addClass('ui-icon-newwin');
+      // toggle icon classes from maximize to restore
+      jqBtn.find('span').removeClass('ui-icon-extlink').addClass('ui-icon-newwin');
 
-    // save the current renderer's dimensions
-    this.height = this.container.css('height');
-    this.width = this.container.css('width');
+      // save the current renderer's dimensions
+      this.height = this.container.css('height');
+      this.width = this.container.css('width');
 
-    // style renderer
-    this.container.css({display: 'block', height: '100%', width: '100%'});
+      // style renderer
+      this.container.css({display: 'block', height: '100%', width: '100%'});
 
-    util.documentRepaint();
-    this.maximized = true;
-  };
+      util.documentRepaint();
+      this.maximized = true;
+    };
 
-  /**
-   * Restore the renderer's window to its original size
-   */
-  rendererjs.Renderer.prototype.restore = function() {
+    /**
+     * Restore the renderer's window to its original size
+     */
+    rendererjs.Renderer.prototype.restore = function() {
 
-    var jqBtn = $('.view-renderer-titlebar-buttonpane-maximize', this.container);
+      var jqBtn = $('.view-renderer-titlebar-buttonpane-maximize', this.container);
 
-    jqBtn.attr('title', 'Maximize');
+      jqBtn.attr('title', 'Maximize');
 
-    // toggle icon classes from restore to maximize
-    jqBtn.find('span').removeClass('ui-icon-newwin').addClass('ui-icon-extlink');
+      // toggle icon classes from restore to maximize
+      jqBtn.find('span').removeClass('ui-icon-newwin').addClass('ui-icon-extlink');
 
-    // style renderer
-    this.container.css({display: 'block', height: this.height, width: this.width});
+      // style renderer
+      this.container.css({display: 'block', height: this.height, width: this.width});
 
-    util.documentRepaint();
-    this.maximized = false;
-  };
+      util.documentRepaint();
+      this.maximized = false;
+    };
 
-  /**
-   * Select the renderer's window
-   */
-  rendererjs.Renderer.prototype.select = function() {
+    /**
+     * Select the renderer's window
+     */
+    rendererjs.Renderer.prototype.select = function() {
 
-    var jqBtn = $('.view-renderer-titlebar-buttonpane-pin', this.container);
+      var jqBtn = $('.view-renderer-titlebar-buttonpane-pin', this.container);
 
-    jqBtn.attr('title', 'Selected');
+      jqBtn.attr('title', 'Selected');
 
-    this.selected = true;
+      this.selected = true;
 
-    // toggle icon classes from deselected to selected
-    jqBtn.find('span').removeClass('ui-icon-pin-w').addClass('ui-icon-pin-s');
-  };
+      // toggle icon classes from deselected to selected
+      jqBtn.find('span').removeClass('ui-icon-pin-w').addClass('ui-icon-pin-s');
+    };
 
-  /**
-   * Deselect the renderer's window
-   */
-  rendererjs.Renderer.prototype.deselect = function() {
+    /**
+     * Deselect the renderer's window
+     */
+    rendererjs.Renderer.prototype.deselect = function() {
 
-    var jqBtn = $('.view-renderer-titlebar-buttonpane-pin', this.container);
+      var jqBtn = $('.view-renderer-titlebar-buttonpane-pin', this.container);
 
-    jqBtn.attr('title', 'Not selected');
+      jqBtn.attr('title', 'Not selected');
 
-    this.selected = false;
+      this.selected = false;
 
-    // toggle icon classes from deselected to selected
-    jqBtn.find('span').removeClass('ui-icon-pin-s').addClass('ui-icon-pin-w');
-  };
+      // toggle icon classes from deselected to selected
+      jqBtn.find('span').removeClass('ui-icon-pin-s').addClass('ui-icon-pin-w');
+    };
 
-  /**
-   * This method is called everytime the renderer changes state.
-   *
-   * @param {Object} event object.
-   */
-  rendererjs.Renderer.prototype.onRendererChange = function(evt) {
+    /**
+     * This method is called everytime the renderer changes state.
+     *
+     * @param {Object} event object.
+     */
+    rendererjs.Renderer.prototype.onRendererChange = function(evt) {
 
-    console.log('onRendererChange not overwritten!');
-    console.log('event obj: ', evt);
-  };
+      console.log('onRendererChange not overwritten!');
+      console.log('event obj: ', evt);
+    };
 
-  /**
-   * This method is called when the close button is clicked.
-   *
-   * @param {Object} event object.
-   */
-  rendererjs.Renderer.prototype.onRendererClose = function(evt) {
+    /**
+     * This method is called when the close button is clicked.
+     *
+     * @param {Object} event object.
+     */
+    rendererjs.Renderer.prototype.onRendererClose = function(evt) {
 
-    // by default the renderer is just hidden
-    this.container.css({display: 'none'});
+      // by default the renderer is just hidden
+      this.container.css({display: 'none'});
 
-    console.log('onRendererClose not overwritten!');
-    console.log('event obj: ', evt);
-  };
+      console.log('onRendererClose not overwritten!');
+      console.log('event obj: ', evt);
+    };
 
-  /**
-   * Create an XTK 2D renderer object and set the renderer property to that object.
-   */
-  rendererjs.Renderer.prototype.createRenderer = function() {
+    /**
+     * Create an XTK 2D renderer object and set the renderer property to that object.
+     */
+    rendererjs.Renderer.prototype.createRenderer = function() {
     var self = this;
 
     if (self.renderer) { return; }
@@ -412,47 +393,47 @@ define(['utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'lossless','xtk', 'dic
     self.renderer = r;
   };
 
-  /**
-   * Create an XTK volume object and set the volume property to that object.
-   */
-  rendererjs.Renderer.prototype.createVolume = function() {
+    /**
+     * Create an XTK volume object and set the volume property to that object.
+     */
+    rendererjs.Renderer.prototype.createVolume = function() {
 
-    var fileNames = [];
-    var imgFileObj = this.imgFileObj;
+      var fileNames = [];
+      var imgFileObj = this.imgFileObj;
 
-    // return if volume already created
-    if (this.volume) {return;}
+      // return if volume already created
+      if (this.volume) {return;}
 
-    if (imgFileObj.imgType === 'dicomzip') {
+      if (imgFileObj.imgType === 'dicomzip') {
 
-      for (var i = 0; i < imgFileObj.files.length; i++) {
-        fileNames[i] = imgFileObj.files[i].name.replace('.zip', '');
+        for (var i = 0; i < imgFileObj.files.length; i++) {
+          fileNames[i] = imgFileObj.files[i].name.replace('.zip', '');
+        }
+
+      } else {
+
+        for (var j = 0; j < imgFileObj.files.length; j++) {
+          fileNames[j] = imgFileObj.files[j].name;
+        }
       }
+      // create xtk object
+      var vol = new X.volume();
+      vol.reslicing = 'false';
 
-    } else {
+      vol.file = fileNames.sort().map(function(str) {
 
-      for (var j = 0; j < imgFileObj.files.length; j++) {
-        fileNames[j] = imgFileObj.files[j].name;
-      }
-    }
-    // create xtk object
-    var vol = new X.volume();
-    vol.reslicing = 'false';
+      return imgFileObj.baseUrl + str;});
 
-    vol.file = fileNames.sort().map(function(str) {
+      this.volume = vol;
+    };
 
-    return imgFileObj.baseUrl + str;});
-
-    this.volume = vol;
-  };
-
-  /**
-   * Get XTK volume properties for the passed orientation.
-   *
-   * @param {String} X, Y or Z orientation.
-   * @return {Object} the volume properties.
-   */
-  rendererjs.Renderer.prototype.getVolProps = function(orientation) {
+    /**
+     * Get XTK volume properties for the passed orientation.
+     *
+     * @param {String} X, Y or Z orientation.
+     * @return {Object} the volume properties.
+     */
+    rendererjs.Renderer.prototype.getVolProps = function(orientation) {
     var volProps = {};
 
     // define XTK volume properties for the passed orientation
@@ -476,13 +457,13 @@ define(['utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'lossless','xtk', 'dic
     return volProps;
   };
 
-  /**
-   * Perform the actual rendering of the volume data.
-   *
-   * @param {Function} optional callback to be called when the renderer is ready. If
-   * the rendering failed then the renderer's error property is set to true.
-   */
-  rendererjs.Renderer.prototype.renderVolume = function(callback) {
+    /**
+     * Perform the actual rendering of the volume data.
+     *
+     * @param {Function} optional callback to be called when the renderer is ready. If
+     * the rendering failed then the renderer's error property is set to true.
+     */
+    rendererjs.Renderer.prototype.renderVolume = function(callback) {
     var self = this;
 
     var r = self.renderer;
@@ -530,24 +511,24 @@ define(['utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'lossless','xtk', 'dic
     util.documentRepaint();
   };
 
-  /**
-   * Update slice info on the HTML.
-   */
-  rendererjs.Renderer.prototype.updateUISliceInfo = function() {
+    /**
+     * Update slice info on the HTML.
+     */
+    rendererjs.Renderer.prototype.updateUISliceInfo = function() {
 
-    var volProps = this.getVolProps(this.orientation);
-    var vol = this.volume;
+      var volProps = this.getVolProps(this.orientation);
+      var vol = this.volume;
 
-    $('.view-renderer-info-bottomleft', this.container).html(
-      'slice: ' + (vol[volProps.index] + 1) + '/' + vol.range[volProps.rangeInd]);
-  };
+      $('.view-renderer-info-bottomleft', this.container).html(
+        'slice: ' + (vol[volProps.index] + 1) + '/' + vol.range[volProps.rangeInd]);
+    };
 
-  /**
-   * Set the MRI information on the UI HTML .
-   *
-   * @param {Function} optional callback to be called when the UI is ready.
-   */
-  rendererjs.Renderer.prototype.setUIMriInfo = function(callback) {
+    /**
+     * Set the MRI information on the UI HTML .
+     *
+     * @param {Function} optional callback to be called when the UI is ready.
+     */
+    rendererjs.Renderer.prototype.setUIMriInfo = function(callback) {
     var self = this;
 
     var imgFileObj = self.imgFileObj;
@@ -645,12 +626,12 @@ define(['utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'lossless','xtk', 'dic
     }
   };
 
-  /**
-   * Generate a thumbnail's image data from a snapshot of the internal canvas.
-   *
-   * @param {Function} callback whose argument is the thumbnail's image data.
-   */
-  rendererjs.Renderer.prototype.getThumbnail = function(callback) {
+    /**
+     * Generate a thumbnail's image data from a snapshot of the internal canvas.
+     *
+     * @param {Function} callback whose argument is the thumbnail's image data.
+     */
+    rendererjs.Renderer.prototype.getThumbnail = function(callback) {
     var self = this;
     var r = self.renderer;
 
@@ -688,13 +669,13 @@ define(['utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'lossless','xtk', 'dic
     }
   };
 
-  /**
-   * Change renderer's orientation.
-   *
-   * @param {String} renderer's orientation: 'X' or 'Y' or 'Z'.
-   * @param {Function} optional callback to be called when the renderer is ready.
-   */
-  rendererjs.Renderer.prototype.changeOrientation = function(orientation, callback) {
+    /**
+     * Change renderer's orientation.
+     *
+     * @param {String} renderer's orientation: 'X' or 'Y' or 'Z'.
+     * @param {Function} optional callback to be called when the renderer is ready.
+     */
+    rendererjs.Renderer.prototype.changeOrientation = function(orientation, callback) {
     var self = this;
 
     self.orientation = orientation;
@@ -707,10 +688,10 @@ define(['utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'lossless','xtk', 'dic
     });
   };
 
-  /**
-   * Private method to destroy internal XTK's renderer object.
-   */
-  rendererjs.Renderer.prototype._destroyRenderer = function() {
+    /**
+     * Private method to destroy internal XTK's renderer object.
+     */
+    rendererjs.Renderer.prototype._destroyRenderer = function() {
     var r = this.renderer;
 
     r.remove(this.volume);
@@ -726,33 +707,33 @@ define(['utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'lossless','xtk', 'dic
     this.renderer = null;
   };
 
-  /**
-   * Destroy all objects and remove html interface
-   */
-  rendererjs.Renderer.prototype.destroy = function() {
+    /**
+     * Destroy all objects and remove html interface
+     */
+    rendererjs.Renderer.prototype.destroy = function() {
 
-    // destroy XTK renderer
-    this._destroyRenderer();
+      // destroy XTK renderer
+      this._destroyRenderer();
 
-    // destroy XTK volume
-    this.volume.destroy();
+      // destroy XTK volume
+      this.volume.destroy();
 
-    // remove html
-    this.container.empty();
+      // remove html
+      this.container.empty();
 
-    // clear objects
-    this.volume = null;
-    this.maximized = false;
-    this.fileManager = null;
-    this.imgFileObj = null;
-  };
+      // clear objects
+      this.volume = null;
+      this.maximized = false;
+      this.fileManager = null;
+      this.imgFileObj = null;
+    };
 
-  /**
-   * Read the local or remote volume files.
-   *
-   * @param {Function} callback to be called when all volume files have been read.
-   */
-  rendererjs.Renderer.prototype.readVolumeFiles = function(callback) {
+    /**
+     * Read the local or remote volume files.
+     *
+     * @param {Function} callback to be called when all volume files have been read.
+     */
+    rendererjs.Renderer.prototype.readVolumeFiles = function(callback) {
     var self = this;
 
     var imgFileObj = self.imgFileObj;
@@ -816,34 +797,34 @@ define(['utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'lossless','xtk', 'dic
     }
   };
 
-  /**
-   * Read a local or remote JSON file.
-   *
-   * @param {Object} HTML5 file object or an object containing properties:
-   *  -remote: a boolean indicating whether the file has not been read locally (with a filepicker)
-   *  -url the file's url
-   *  -clouId: the id of the file in a cloud storage system if stored in the cloud
-   * @param {Function} callback whose argument is a JSON object with the file data.
-   */
-  rendererjs.Renderer.prototype.readJSONFile = function(file, callback) {
+    /**
+     * Read a local or remote JSON file.
+     *
+     * @param {Object} HTML5 file object or an object containing properties:
+     *  -remote: a boolean indicating whether the file has not been read locally (with a filepicker)
+     *  -url the file's url
+     *  -clouId: the id of the file in a cloud storage system if stored in the cloud
+     * @param {Function} callback whose argument is a JSON object with the file data.
+     */
+    rendererjs.Renderer.prototype.readJSONFile = function(file, callback) {
 
-    this.readFile(file, 'readAsText', function(data) {
+      this.readFile(file, 'readAsText', function(data) {
 
-      callback(JSON.parse(data));
-    });
-  };
+        callback(JSON.parse(data));
+      });
+    };
 
-  /**
-   * Read a local or remote file.
-   *
-   * @param {Object} HTML5 file object or an object containing properties:
-   *  -remote: a boolean indicating whether the file has not been read locally (with a filepicker)
-   *  -url the file's url
-   *  -clouId: the id of the file in a cloud storage system if stored in the cloud
-   * @param {String} reading method.
-   * @param {Function} callback whose argument is the file data.
-   */
-  rendererjs.Renderer.prototype.readFile = function(file, readingMethod, callback) {
+    /**
+     * Read a local or remote file.
+     *
+     * @param {Object} HTML5 file object or an object containing properties:
+     *  -remote: a boolean indicating whether the file has not been read locally (with a filepicker)
+     *  -url the file's url
+     *  -clouId: the id of the file in a cloud storage system if stored in the cloud
+     * @param {String} reading method.
+     * @param {Function} callback whose argument is the file data.
+     */
+    rendererjs.Renderer.prototype.readFile = function(file, readingMethod, callback) {
     var self = this;
 
     var reader = new FileReader();
@@ -887,23 +868,23 @@ define(['utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'lossless','xtk', 'dic
     }
   };
 
-  /**
-   * Zip the contents of several files into a few zip file contents. Maximum size for
-   * each resultant zip file contents is 20 MB.
-   *
-   * @param {Array} Array of HTML5 file objects or objects containing properties:
-   *  -remote: a boolean indicating whether the file has not been read locally (with a filepicker)
-   *  -url the file's url
-   *  -cloudId: the id of the file in a cloud storage system if stored in the cloud
-   * @param {Function} callback whose argument is an array of arrayBuffer. Each entry of the
-   * array contains the data for a single zip file.
-   */
-  rendererjs.Renderer.prototype.zipFiles = function(fileArr, callback) {
+    /**
+     * Zip the contents of several files into a few zip file contents. Maximum size for
+     * each resultant zip file contents is 20 MB.
+     *
+     * @param {Array} Array of HTML5 file objects or objects containing properties:
+     *  -remote: a boolean indicating whether the file has not been read locally (with a filepicker)
+     *  -url the file's url
+     *  -cloudId: the id of the file in a cloud storage system if stored in the cloud
+     * @param {Function} callback whose argument is an array of arrayBuffer. Each entry of the
+     * array contains the data for a single zip file.
+     */
+    rendererjs.Renderer.prototype.zipFiles = function(fileArr, callback) {
 
-    var url, fileName;
-    var fileDataArr = [];
+      var url, fileName;
+      var fileDataArr = [];
 
-    function zipFiles() {
+      function zipFiles() {
         var zip = jszip();
         var zipDataArr = [];
         var contents;
@@ -940,139 +921,139 @@ define(['utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'lossless','xtk', 'dic
         return zipDataArr;
       }
 
-    function addFile(fName, fData) {
+      function addFile(fName, fData) {
 
-      fileDataArr.push({name: fName, data: fData});
+        fileDataArr.push({name: fName, data: fData});
 
-      if (fileDataArr.length === fileArr.length) {
+        if (fileDataArr.length === fileArr.length) {
 
-        // all files have been read so generate the zip files' contents
-        callback(zipFiles());
-      }
-    }
-
-    for (var i = 0; i < fileArr.length; i++) {
-
-      if (fileArr[i].remote) {
-
-        url = fileArr[i].url;
-        fileName = url.substring(url.lastIndexOf('/') + 1);
-
-      } else {
-
-        fileName = fileArr[i].name;
-      }
-
-      this.readFile(fileArr[i], 'readAsArrayBuffer', addFile.bind(null, fileName));
-    }
-  };
-
-  /**
-   * Unzip the contents of a zip file.
-   *
-   * @param {Array} ArrayBuffer corresponding to the zip file data.
-   * @return {Array} array of objects where each object has the properties name: the file
-   * name and data: the file's data.
-   */
-  rendererjs.Renderer.prototype.unzipFileData = function(zData) {
-
-    var zip = jszip(zData);
-    var fileDataArr = [];
-
-    for (var name in zip.files) {
-      fileDataArr.push({name: name, data: zip.file(name).asArrayBuffer()});
-    }
-
-    return fileDataArr;
-  };
-
-  /**
-   * Static method to determine if a File object is a supported neuroimage type.
-   *
-   * @param {Object} HTML5 File object
-   * @return {String} the type of the image: 'dicom', 'dicomzip', 'vol', 'fibers', 'mesh',
-   * 'thumbnail', 'json' or 'unsupported'
-   */
-  rendererjs.Renderer.imgType = function(file) {
-
-    var ext = {};
-    var type;
-    var name = file.name;
-
-    // dicom extensions
-    ext.DICOM = ['.dcm', '.ima', '.DCM', '.IMA'];
-    // zipped dicom extensions
-    ext.DICOMZIP = ['.dcm.zip', '.DCM.zip', '.ima.zip', '.IMA.zip'];
-    // volume extensions
-    ext.VOL = ['.mgh', '.mgz', '.nrrd', '.nii', '.nii.gz'];
-    // fibers extension is .trk
-    ext.FIBERS = ['.trk'];
-    // geometric model extensions
-    ext.MESH = ['.obj', '.vtk', '.stl'];
-    // thumbnail extensions
-    ext.THUMBNAIL = ['.png', '.gif', '.jpg'];
-    // json extensions
-    ext.JSON = ['.json'];
-
-    // here we assume that DICOM file names with no extension only contain digits after the last dot
-
-    if ((name.indexOf('.') === -1) || util.strEndsWith(name, ext.DICOM) || (/^\d+$/.test(name.split('.').pop()))) {
-      type = 'dicom';
-
-    } else if (util.strEndsWith(name, ['.zip'])) {
-      type = 'dicomzip';
-
-      if (!util.strEndsWith(name, ext.DICOMZIP)) {
-
-        // check if the zipping might have been performed on a DICOM file with no extension in its name
-        if (name.slice(0, name.lastIndexOf('.')).indexOf('.') !== -1) {
-          var nameArr = name.split('.');
-          nameArr.pop();
-
-          if (!(/^\d+$/.test(nameArr.pop()))) {
-            type = 'unsupported';
-          }
+          // all files have been read so generate the zip files' contents
+          callback(zipFiles());
         }
       }
 
-    } else if (util.strEndsWith(name, ext.VOL)) {
-      type = 'vol';
+      for (var i = 0; i < fileArr.length; i++) {
 
-    } else if (util.strEndsWith(name, ext.FIBERS)) {
-      type = 'fibers';
+        if (fileArr[i].remote) {
 
-    } else if (util.strEndsWith(name, ext.MESH)) {
-      type = 'mesh';
+          url = fileArr[i].url;
+          fileName = url.substring(url.lastIndexOf('/') + 1);
 
-    } else if (util.strEndsWith(name, ext.THUMBNAIL)) {
-      type = 'thumbnail';
+        } else {
 
-    } else if (util.strEndsWith(name, ext.JSON)) {
-      type = 'json';
+          fileName = fileArr[i].name;
+        }
 
-    } else {
-      type = 'unsupported';
-    }
+        this.readFile(fileArr[i], 'readAsArrayBuffer', addFile.bind(null, fileName));
+      }
+    };
 
-    return type;
-  };
+    /**
+     * Unzip the contents of a zip file.
+     *
+     * @param {Array} ArrayBuffer corresponding to the zip file data.
+     * @return {Array} array of objects where each object has the properties name: the file
+     * name and data: the file's data.
+     */
+    rendererjs.Renderer.prototype.unzipFileData = function(zData) {
 
-  /**
-   * Static method to parse a dicom file. Raises an exception if the parsing fails.
-   *
-   * @return {Object} the dicom info object
-   */
-  rendererjs.Renderer.parseDicom = function(dicomFileData) {
+      var zip = jszip(zData);
+      var fileDataArr = [];
 
-    // Here we use Chafey's dicomParser: https://github.com/chafey/dicomParser.
-    // dicomParser requires as input a Uint8Array so we create it here
-    var byteArray = new Uint8Array(dicomFileData);
+      for (var name in zip.files) {
+        fileDataArr.push({name: name, data: zip.file(name).asArrayBuffer()});
+      }
 
-    // Invoke the parseDicom function and get back a DataSet object with the contents
-    var dataSet = dicomParser.parseDicom(byteArray);
+      return fileDataArr;
+    };
 
-    // Access any desire property using its tag
-    return {
+    /**
+     * Static method to determine if a File object is a supported neuroimage type.
+     *
+     * @param {Object} HTML5 File object
+     * @return {String} the type of the image: 'dicom', 'dicomzip', 'vol', 'fibers', 'mesh',
+     * 'thumbnail', 'json' or 'unsupported'
+     */
+    rendererjs.Renderer.imgType = function(file) {
+
+      var ext = {};
+      var type;
+      var name = file.name;
+
+      // dicom extensions
+      ext.DICOM = ['.dcm', '.ima', '.DCM', '.IMA'];
+      // zipped dicom extensions
+      ext.DICOMZIP = ['.dcm.zip', '.DCM.zip', '.ima.zip', '.IMA.zip'];
+      // volume extensions
+      ext.VOL = ['.mgh', '.mgz', '.nrrd', '.nii', '.nii.gz'];
+      // fibers extension is .trk
+      ext.FIBERS = ['.trk'];
+      // geometric model extensions
+      ext.MESH = ['.obj', '.vtk', '.stl'];
+      // thumbnail extensions
+      ext.THUMBNAIL = ['.png', '.gif', '.jpg'];
+      // json extensions
+      ext.JSON = ['.json'];
+
+      // here we assume that DICOM file names with no extension only contain digits after the last dot
+
+      if ((name.indexOf('.') === -1) || util.strEndsWith(name, ext.DICOM) || (/^\d+$/.test(name.split('.').pop()))) {
+        type = 'dicom';
+
+      } else if (util.strEndsWith(name, ['.zip'])) {
+        type = 'dicomzip';
+
+        if (!util.strEndsWith(name, ext.DICOMZIP)) {
+
+          // check if the zipping might have been performed on a DICOM file with no extension in its name
+          if (name.slice(0, name.lastIndexOf('.')).indexOf('.') !== -1) {
+            var nameArr = name.split('.');
+            nameArr.pop();
+
+            if (!(/^\d+$/.test(nameArr.pop()))) {
+              type = 'unsupported';
+            }
+          }
+        }
+
+      } else if (util.strEndsWith(name, ext.VOL)) {
+        type = 'vol';
+
+      } else if (util.strEndsWith(name, ext.FIBERS)) {
+        type = 'fibers';
+
+      } else if (util.strEndsWith(name, ext.MESH)) {
+        type = 'mesh';
+
+      } else if (util.strEndsWith(name, ext.THUMBNAIL)) {
+        type = 'thumbnail';
+
+      } else if (util.strEndsWith(name, ext.JSON)) {
+        type = 'json';
+
+      } else {
+        type = 'unsupported';
+      }
+
+      return type;
+    };
+
+    /**
+     * Static method to parse a dicom file. Raises an exception if the parsing fails.
+     *
+     * @return {Object} the dicom info object
+     */
+    rendererjs.Renderer.parseDicom = function(dicomFileData) {
+
+      // Here we use Chafey's dicomParser: https://github.com/chafey/dicomParser.
+      // dicomParser requires as input a Uint8Array so we create it here
+      var byteArray = new Uint8Array(dicomFileData);
+
+      // Invoke the parseDicom function and get back a DataSet object with the contents
+      var dataSet = dicomParser.parseDicom(byteArray);
+
+      // Access any desire property using its tag
+      return {
         patientName: dataSet.string('x00100010'),
         patientId: dataSet.string('x00100020'),
         patientBirthDate: dataSet.string('x00100030'),
@@ -1082,7 +1063,7 @@ define(['utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'lossless','xtk', 'dic
         manufacturer: dataSet.string('x00080070'),
         studyDate: dataSet.string('x00080020')
       };
-  };
+    };
 
-  return rendererjs;
-});
+    return rendererjs;
+  });

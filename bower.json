@@ -30,6 +30,7 @@
     "dicomParser": "~1.0.1",
     "jszip": "Stuk/jszip#~2.5.0",
     "utiljs": "https://github.com/FNNDSC/utiljs.git#master",
-    "fmjs": "https://github.com/FNNDSC/fmjs.git#master"
+    "fmjs": "https://github.com/FNNDSC/fmjs.git#master",
+    "text": "^2.0.14"
   }
 }
