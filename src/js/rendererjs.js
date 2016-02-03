@@ -534,7 +534,9 @@ define(['text!rendererwin', 'utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'l
     var imgFileObj = self.imgFileObj;
     var vol = self.volume;
 
-    function setHTMLInfo(info) {
+    function setHTMLInfo() {
+
+      var info = self.mriInfo;
       var jqR = self.container;
       var age = '', orient = '', direct = '';
 
@@ -585,24 +587,10 @@ define(['text!rendererwin', 'utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'l
 
       // if there is a json file then read it
       self.readJSONFile(imgFileObj.json, function(jsonObj) {
-        self.mriInfo = {
-          patientName: jsonObj.PatientName,
-          patientId: jsonObj.PatientID,
-          patientBirthDate: jsonObj.PatientBirthDate,
-          patientSex: jsonObj.PatientSex,
-          seriesDescription: jsonObj.SeriesDescription,
-          manufacturer: jsonObj.Manufacturer,
-          studyDate: jsonObj.StudyDate,
-          orientation: jsonObj.mri_info.orientation,
-          primarySliceDirection: jsonObj.mri_info.primarySliceDirection,
-          dimensions: jsonObj.mri_info.dimensions,
-          voxelSizes: jsonObj.mri_info.voxelSizes,
-          thumbnailLabel: jsonObj.thumbnail.label,
-          thumbnailTooltip: jsonObj.thumbnail.tooltip,
-          metaHTML: jsonObj.meta.html
-        };
 
-        setHTMLInfo(self.mriInfo);
+        self.parseJSONData(jsonObj);
+
+        setHTMLInfo();
       });
 
     } else if (imgFileObj.dicomInfo) {
@@ -614,7 +602,7 @@ define(['text!rendererwin', 'utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'l
       self.mriInfo.voxelSizes = vol.spacing[0].toPrecision(4) + ', ' + vol.spacing[1].toPrecision(4) +
       ', ' + vol.spacing[2].toPrecision(4);
 
-      setHTMLInfo(self.mriInfo);
+      setHTMLInfo();
 
     } else {
 
@@ -726,6 +714,44 @@ define(['text!rendererwin', 'utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'l
       this.maximized = false;
       this.fileManager = null;
       this.imgFileObj = null;
+    };
+
+    /**
+     * Parse a JSON data object.
+     */
+    rendererjs.Renderer.prototype.parseJSONData = function(jsonObj) {
+
+      if (jsonObj) {
+
+        this.mriInfo = {
+          patientName: jsonObj.PatientName,
+          patientId: jsonObj.PatientID,
+          patientBirthDate: jsonObj.PatientBirthDate,
+          patientSex: jsonObj.PatientSex,
+          seriesDescription: jsonObj.SeriesDescription,
+          manufacturer: jsonObj.Manufacturer,
+          studyDate: jsonObj.StudyDate
+        };
+
+        if (jsonObj.mri_info) {
+
+          this.mriInfo.orientation = jsonObj.mri_info.orientation;
+          this.mriInfo.primarySliceDirection = jsonObj.mri_info.primarySliceDirection;
+          this.mriInfo.dimensions = jsonObj.mri_info.dimensions;
+          this.mriInfo.voxelSizes = jsonObj.mri_info.voxelSizes;
+        }
+
+        if (jsonObj.thumbnail) {
+
+          this.mriInfo.thumbnailLabel = jsonObj.thumbnail.label;
+          this.mriInfo.thumbnailTooltip = jsonObj.thumbnail.tooltip;
+        }
+
+        if (jsonObj.meta) {
+
+          this.mriInfo.metaHTML = jsonObj.meta.html;
+        }
+      }
     };
 
     /**
