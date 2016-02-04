@@ -94,22 +94,22 @@ define(['text!rendererwin', 'utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'l
      * renderer's error property is set to true.
      */
     rendererjs.Renderer.prototype.init = function(imgFileObj, callback) {
-    var self = this;
+      var self = this;
 
-    self.imgFileObj = imgFileObj;
-    self.createUI();
-    self.createRenderer();
-    self.createVolume();
+      self.imgFileObj = imgFileObj;
+      self.createUI();
+      self.createRenderer();
+      self.createVolume();
 
-    self.readVolumeFiles(function() {
+      self.readVolumeFiles(function() {
 
-      self.renderVolume(function() {
+        self.renderVolume(function() {
 
-        // renderer ready
-        if (callback) { callback(); }
+          // renderer ready
+          if (callback) { callback(); }
+        });
       });
-    });
-  };
+    };
 
     /**
      * Create and initialize the renderer's HTML UI.
@@ -204,25 +204,25 @@ define(['text!rendererwin', 'utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'l
      * Initilize Mail window's HTML and event handlers.
      */
     rendererjs.Renderer.prototype.initInfoWindow = function() {
-    var self = this;
+      var self = this;
 
-    var infoWin = $('<div></div>');
-    self.infoWin = infoWin;
+      var infoWin = $('<div></div>');
+      self.infoWin = infoWin;
 
-    // convert the previous div into a floating window with a close button
-    infoWin.dialog({
-      title: 'Volume info',
-      modal: true,
-      autoOpen: false,
-      minHeight: 400,
-      height: 500,
-      minWidth: 700,
-      width: 800
-    });
+      // convert the previous div into a floating window with a close button
+      infoWin.dialog({
+        title: 'Volume info',
+        modal: true,
+        autoOpen: false,
+        minHeight: 400,
+        height: 500,
+        minWidth: 700,
+        width: 800
+      });
 
-    // add the HTML contents to the floating window
-    infoWin.append('<div class="view-renderer-infowin">No MRI meta information was provided.</div>');
-  };
+      // add the HTML contents to the floating window
+      infoWin.append('<div class="view-renderer-infowin">No MRI meta information was provided.</div>');
+    };
 
     /**
      * Maximize the renderer's window
@@ -325,73 +325,73 @@ define(['text!rendererwin', 'utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'l
      * Create an XTK 2D renderer object and set the renderer property to that object.
      */
     rendererjs.Renderer.prototype.createRenderer = function() {
-    var self = this;
+      var self = this;
 
-    if (self.renderer) { return; }
+      if (self.renderer) { return; }
 
-    // create xtk object
-    var r = new X.renderer2D();
-    r.container = self.rendererId;
-    r.bgColor = [0.2, 0.2, 0.2];
-    r.orientation = self.orientation;
-    r.init();
+      // create xtk object
+      var r = new X.renderer2D();
+      r.container = self.rendererId;
+      r.bgColor = [0.2, 0.2, 0.2];
+      r.orientation = self.orientation;
+      r.init();
 
-    //
-    // XTK renderer's UI event handlers
-    //
-    this.onRenderer2DScroll = function(evt) {
+      //
+      // XTK renderer's UI event handlers
+      //
+      this.onRenderer2DScroll = function(evt) {
 
-      self.updateUISliceInfo();
-      self.onRendererChange(evt);
+        self.updateUISliceInfo();
+        self.onRendererChange(evt);
+      };
+
+      this.onRenderer2DZoom = function(evt) {
+
+        self.onRendererChange(evt);
+      };
+
+      this.onRenderer2DPan = function(evt) {
+
+        self.onRendererChange(evt);
+      };
+
+      this.onRenderer2DRotate = function(evt) {
+
+        self.onRendererChange(evt);
+      };
+
+      this.onRenderer2DFlipColumns = function(evt) {
+
+        // press W to trigger this event
+        r.flipColumns = !r.flipColumns;
+        self.onRendererChange(evt);
+      };
+
+      this.onRenderer2DFlipRows = function(evt) {
+
+        // press Q to trigger this event
+        r.flipRows = !r.flipRows;
+        self.onRendererChange(evt);
+      };
+
+      this.onRenderer2DPoint = function(evt) {
+
+        self.onRendererChange(evt);
+      };
+
+      // bind event handler callbacks with the renderer's interactor
+      r.interactor.addEventListener(X.event.events.SCROLL, this.onRenderer2DScroll);
+      r.interactor.addEventListener(X.event.events.ZOOM, this.onRenderer2DZoom);
+      r.interactor.addEventListener(X.event.events.PAN, this.onRenderer2DPan);
+      r.interactor.addEventListener(X.event.events.ROTATE, this.onRenderer2DRotate);
+      r.interactor.addEventListener('flipColumns', this.onRenderer2DFlipColumns);
+      r.interactor.addEventListener('flipRows', this.onRenderer2DFlipRows);
+
+      // called every time the pointing position is changed with shift+left-mouse
+      r.addEventListener('onPoint', this.onRenderer2DPoint);
+
+      self.renderer = r;
     };
-
-    this.onRenderer2DZoom = function(evt) {
-
-      self.onRendererChange(evt);
-    };
-
-    this.onRenderer2DPan = function(evt) {
-
-      self.onRendererChange(evt);
-    };
-
-    this.onRenderer2DRotate = function(evt) {
-
-      self.onRendererChange(evt);
-    };
-
-    this.onRenderer2DFlipColumns = function(evt) {
-
-      // press W to trigger this event
-      r.flipColumns = !r.flipColumns;
-      self.onRendererChange(evt);
-    };
-
-    this.onRenderer2DFlipRows = function(evt) {
-
-      // press Q to trigger this event
-      r.flipRows = !r.flipRows;
-      self.onRendererChange(evt);
-    };
-
-    this.onRenderer2DPoint = function(evt) {
-
-      self.onRendererChange(evt);
-    };
-
-    // bind event handler callbacks with the renderer's interactor
-    r.interactor.addEventListener(X.event.events.SCROLL, this.onRenderer2DScroll);
-    r.interactor.addEventListener(X.event.events.ZOOM, this.onRenderer2DZoom);
-    r.interactor.addEventListener(X.event.events.PAN, this.onRenderer2DPan);
-    r.interactor.addEventListener(X.event.events.ROTATE, this.onRenderer2DRotate);
-    r.interactor.addEventListener('flipColumns', this.onRenderer2DFlipColumns);
-    r.interactor.addEventListener('flipRows', this.onRenderer2DFlipRows);
-
-    // called every time the pointing position is changed with shift+left-mouse
-    r.addEventListener('onPoint', this.onRenderer2DPoint);
-
-    self.renderer = r;
-  };
 
     /**
      * Create an XTK volume object and set the volume property to that object.
@@ -434,28 +434,28 @@ define(['text!rendererwin', 'utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'l
      * @return {Object} the volume properties.
      */
     rendererjs.Renderer.prototype.getVolProps = function(orientation) {
-    var volProps = {};
+      var volProps = {};
 
-    // define XTK volume properties for the passed orientation
-    volProps.index = 'index' + orientation;
+      // define XTK volume properties for the passed orientation
+      volProps.index = 'index' + orientation;
 
-    switch (orientation) {
+      switch (orientation) {
 
-      case 'X':
-        volProps.rangeInd = 0;
-      break;
+        case 'X':
+          volProps.rangeInd = 0;
+        break;
 
-      case 'Y':
-        volProps.rangeInd = 1;
-      break;
+        case 'Y':
+          volProps.rangeInd = 1;
+        break;
 
-      case 'Z':
-        volProps.rangeInd = 2;
-      break;
-    }
+        case 'Z':
+          volProps.rangeInd = 2;
+        break;
+      }
 
-    return volProps;
-  };
+      return volProps;
+    };
 
     /**
      * Perform the actual rendering of the volume data.
@@ -464,52 +464,52 @@ define(['text!rendererwin', 'utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'l
      * the rendering failed then the renderer's error property is set to true.
      */
     rendererjs.Renderer.prototype.renderVolume = function(callback) {
-    var self = this;
+      var self = this;
 
-    var r = self.renderer;
-    var vol = self.volume;
+      var r = self.renderer;
+      var vol = self.volume;
 
-    // the onShowtime event handler gets executed after all files were fully loaded and
-    // just before the first rendering attempt
-    r.afterRender = function() {
+      // the onShowtime event handler gets executed after all files were fully loaded and
+      // just before the first rendering attempt
+      r.afterRender = function() {
 
-      if (vol.status === 'INVALID') {
+        if (vol.status === 'INVALID') {
 
-        // there were XTK errors while parsing the volume
+          // there were XTK errors while parsing the volume
+          self.error = true;
+          console.error('Could not render volume ' + self.imgFileObj.baseUrl);
+
+          if (callback) { callback(); }
+
+        } else {
+
+          self.setUIMriInfo(function() {
+
+            // renderer is ready
+            if (callback) { callback(); }
+          });
+        }
+        r.afterRender = function() {};
+      };
+
+      try {
+
+        r.add(vol);
+
+      } catch (err) {
+
         self.error = true;
-        console.error('Could not render volume ' + self.imgFileObj.baseUrl);
+        console.error('Could not render volume ' + self.imgFileObj.baseUrl + ' - ' + err);
 
         if (callback) { callback(); }
 
-      } else {
-
-        self.setUIMriInfo(function() {
-
-          // renderer is ready
-          if (callback) { callback(); }
-        });
+        return;
       }
-      r.afterRender = function() {};
+
+      // start the rendering
+      r.render();
+      util.documentRepaint();
     };
-
-    try {
-
-      r.add(vol);
-
-    } catch (err) {
-
-      self.error = true;
-      console.error('Could not render volume ' + self.imgFileObj.baseUrl + ' - ' + err);
-
-      if (callback) { callback(); }
-
-      return;
-    }
-
-    // start the rendering
-    r.render();
-    util.documentRepaint();
-  };
 
     /**
      * Update slice info on the HTML.
@@ -529,90 +529,90 @@ define(['text!rendererwin', 'utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'l
      * @param {Function} optional callback to be called when the UI is ready.
      */
     rendererjs.Renderer.prototype.setUIMriInfo = function(callback) {
-    var self = this;
+      var self = this;
 
-    var imgFileObj = self.imgFileObj;
-    var vol = self.volume;
+      var imgFileObj = self.imgFileObj;
+      var vol = self.volume;
 
-    function setHTMLInfo() {
+      function setHTMLInfo() {
 
-      var info = self.mriInfo;
-      var jqR = self.container;
-      var age = '', orient = '', direct = '';
+        var info = self.mriInfo;
+        var jqR = self.container;
+        var age = '', orient = '', direct = '';
 
-      if (info.patientAge) {
-        age =  'AGE: ' + info.patientAge + '<br>';
+        if (info.patientAge) {
+          age =  'AGE: ' + info.patientAge + '<br>';
+        }
+
+        $('.view-renderer-info-topleft', jqR).html(
+          info.patientName + '<br>' +
+          info.patientId + '<br>' +
+          'BIRTHDATE: ' + info.patientBirthDate + '<br>' +
+          age +
+          'SEX: ' + info.patientSex
+        );
+
+        $('.view-renderer-info-topright', jqR).html(
+          'SERIES: ' + info.seriesDescription + '<br>' +
+          info.manufacturer + '<br>' +
+          info.studyDate + '<br>' +
+          info.dimensions + '<br>' +
+          info.voxelSizes
+        );
+
+        if (info.orientation) {
+          orient = info.orientation + '<br>';
+        }
+
+        if (info.primarySliceDirection) {
+          direct = info.primarySliceDirection;
+        }
+
+        $('.view-renderer-info-bottomright', jqR).html(
+          orient + direct
+        );
+
+        self.updateUISliceInfo();
+
+        if (info.metaHTML) {
+
+          $('.view-renderer-infowin', self.infoWin).html(info.metaHTML);
+        }
+
+        // UI is ready
+        if (callback) { callback(); }
       }
 
-      $('.view-renderer-info-topleft', jqR).html(
-        info.patientName + '<br>' +
-        info.patientId + '<br>' +
-        'BIRTHDATE: ' + info.patientBirthDate + '<br>' +
-        age +
-        'SEX: ' + info.patientSex
-      );
+      if (imgFileObj.json) {
 
-      $('.view-renderer-info-topright', jqR).html(
-        'SERIES: ' + info.seriesDescription + '<br>' +
-        info.manufacturer + '<br>' +
-        info.studyDate + '<br>' +
-        info.dimensions + '<br>' +
-        info.voxelSizes
-      );
+        // if there is a json file then read it
+        self.readJSONFile(imgFileObj.json, function(jsonObj) {
 
-      if (info.orientation) {
-        orient = info.orientation + '<br>';
-      }
+          self.parseJSONData(jsonObj);
 
-      if (info.primarySliceDirection) {
-        direct = info.primarySliceDirection;
-      }
+          setHTMLInfo();
+        });
 
-      $('.view-renderer-info-bottomright', jqR).html(
-        orient + direct
-      );
+      } else if (imgFileObj.dicomInfo) {
 
-      self.updateUISliceInfo();
+        // if instead there is dicom information then use it
+        self.mriInfo = imgFileObj.dicomInfo;
 
-      if (info.metaHTML) {
-
-        $('.view-renderer-infowin', self.infoWin).html(info.metaHTML);
-      }
-
-      // UI is ready
-      if (callback) { callback(); }
-    }
-
-    if (imgFileObj.json) {
-
-      // if there is a json file then read it
-      self.readJSONFile(imgFileObj.json, function(jsonObj) {
-
-        self.parseJSONData(jsonObj);
+        self.mriInfo.dimensions = (vol.range[0]) + ' x ' + (vol.range[1]) + ' x ' + (vol.range[2]);
+        self.mriInfo.voxelSizes = vol.spacing[0].toPrecision(4) + ', ' + vol.spacing[1].toPrecision(4) +
+        ', ' + vol.spacing[2].toPrecision(4);
 
         setHTMLInfo();
-      });
 
-    } else if (imgFileObj.dicomInfo) {
+      } else {
 
-      // if instead there is dicom information then use it
-      self.mriInfo = imgFileObj.dicomInfo;
+        // just display slice number
+        self.updateUISliceInfo();
 
-      self.mriInfo.dimensions = (vol.range[0]) + ' x ' + (vol.range[1]) + ' x ' + (vol.range[2]);
-      self.mriInfo.voxelSizes = vol.spacing[0].toPrecision(4) + ', ' + vol.spacing[1].toPrecision(4) +
-      ', ' + vol.spacing[2].toPrecision(4);
-
-      setHTMLInfo();
-
-    } else {
-
-      // just display slice number
-      self.updateUISliceInfo();
-
-      // UI is ready
-      if (callback) { callback(); }
-    }
-  };
+        // UI is ready
+        if (callback) { callback(); }
+      }
+    };
 
     /**
      * Generate a thumbnail's image data from a snapshot of the internal canvas.
@@ -620,42 +620,42 @@ define(['text!rendererwin', 'utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'l
      * @param {Function} callback whose argument is the thumbnail's image data.
      */
     rendererjs.Renderer.prototype.getThumbnail = function(callback) {
-    var self = this;
-    var r = self.renderer;
+      var self = this;
+      var r = self.renderer;
 
-    var getThumbnail = function() {
+      var getThumbnail = function() {
 
-      var canvas = $('canvas', self.container)[0];
+        var canvas = $('canvas', self.container)[0];
 
-      self.readFile(util.dataURItoJPGBlob(canvas.toDataURL('image/jpeg')), 'readAsDataURL', function(thData) {
+        self.readFile(util.dataURItoJPGBlob(canvas.toDataURL('image/jpeg')), 'readAsDataURL', function(thData) {
 
-        callback(thData);
-      });
-    };
+          callback(thData);
+        });
+      };
 
-    //
-    // thumbnail can be generated only after the first rendering has happen
-    //
-    r.afterRender = function() {
+      //
+      // thumbnail can be generated only after the first rendering has happen
+      //
+      r.afterRender = function() {
 
-      if (!self.renderedOnce) {
+        if (!self.renderedOnce) {
 
-        self.renderedOnce = true;
+          self.renderedOnce = true;
+          getThumbnail();
+        }
+      };
+
+      if (self.renderedOnce) {
+
         getThumbnail();
+
+      } else {
+
+        // start a rendering
+        r.render();
+        util.documentRepaint();
       }
     };
-
-    if (self.renderedOnce) {
-
-      getThumbnail();
-
-    } else {
-
-      // start a rendering
-      r.render();
-      util.documentRepaint();
-    }
-  };
 
     /**
      * Change renderer's orientation.
@@ -664,36 +664,43 @@ define(['text!rendererwin', 'utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'l
      * @param {Function} optional callback to be called when the renderer is ready.
      */
     rendererjs.Renderer.prototype.changeOrientation = function(orientation, callback) {
-    var self = this;
 
-    self.orientation = orientation;
-    self._destroyRenderer();
-    self.createRenderer();
-    self.renderVolume(function() {
+      if (this.orientation !== orientation) {
 
-      // renderer ready
-      if (callback) { callback(); }
-    });
-  };
+        this.orientation = orientation;
+        this._destroyRenderer();
+        this.createRenderer();
+        this.renderVolume(function() {
+
+          // renderer ready
+          if (callback) { callback(); }
+        });
+
+      } else {
+
+        // passed orientation is the current orientation so renderer already ready
+        if (callback) { callback(); }
+      }
+    };
 
     /**
      * Private method to destroy internal XTK's renderer object.
      */
     rendererjs.Renderer.prototype._destroyRenderer = function() {
-    var r = this.renderer;
+      var r = this.renderer;
 
-    r.remove(this.volume);
-    r.interactor.removeEventListener(X.event.events.SCROLL, this.onRenderer2DScroll);
-    r.interactor.removeEventListener(X.event.events.ZOOM, this.onRenderer2DZoom);
-    r.interactor.removeEventListener(X.event.events.PAN, this.onRenderer2DPan);
-    r.interactor.removeEventListener(X.event.events.ROTATE, this.onRenderer2DRotate);
-    r.interactor.removeEventListener('flipColumns', this.onRenderer2DFlipColumns);
-    r.interactor.removeEventListener('flipRows', this.onRenderer2DFlipRows);
-    r.removeEventListener('onPoint', this.onRenderer2DPoint);
-    r.destroy();
+      r.remove(this.volume);
+      r.interactor.removeEventListener(X.event.events.SCROLL, this.onRenderer2DScroll);
+      r.interactor.removeEventListener(X.event.events.ZOOM, this.onRenderer2DZoom);
+      r.interactor.removeEventListener(X.event.events.PAN, this.onRenderer2DPan);
+      r.interactor.removeEventListener(X.event.events.ROTATE, this.onRenderer2DRotate);
+      r.interactor.removeEventListener('flipColumns', this.onRenderer2DFlipColumns);
+      r.interactor.removeEventListener('flipRows', this.onRenderer2DFlipRows);
+      r.removeEventListener('onPoint', this.onRenderer2DPoint);
+      r.destroy();
 
-    this.renderer = null;
-  };
+      this.renderer = null;
+    };
 
     /**
      * Destroy all objects and remove html interface
@@ -760,68 +767,68 @@ define(['text!rendererwin', 'utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'l
      * @param {Function} callback to be called when all volume files have been read.
      */
     rendererjs.Renderer.prototype.readVolumeFiles = function(callback) {
-    var self = this;
+      var self = this;
 
-    var imgFileObj = self.imgFileObj;
-    var vol = self.volume;
-    var numFiles = 0;
-    var filedata = [];
+      var imgFileObj = self.imgFileObj;
+      var vol = self.volume;
+      var numFiles = 0;
+      var filedata = [];
 
-    // function to read a single volume file
-    function readFile(file, ix) {
+      // function to read a single volume file
+      function readFile(file, ix) {
 
-      self.readFile(file, 'readAsArrayBuffer', function(data) {
-        filedata[ix] = data;
-        ++numFiles;
+        self.readFile(file, 'readAsArrayBuffer', function(data) {
+          filedata[ix] = data;
+          ++numFiles;
 
-        if (numFiles === imgFileObj.files.length) {
+          if (numFiles === imgFileObj.files.length) {
 
-          if (imgFileObj.imgType === 'dicom' || imgFileObj.imgType === 'dicomzip') {
+            if (imgFileObj.imgType === 'dicom' || imgFileObj.imgType === 'dicomzip') {
 
-            // if the files are zip files of dicoms then unzip them and sort the resultant files
-            if (imgFileObj.imgType === 'dicomzip') {
-              var fDataArr = [];
+              // if the files are zip files of dicoms then unzip them and sort the resultant files
+              if (imgFileObj.imgType === 'dicomzip') {
+                var fDataArr = [];
 
-              for (var i = 0; i < filedata.length; i++) {
-                fDataArr = fDataArr.concat(self.unzipFileData(filedata[i]));
+                for (var i = 0; i < filedata.length; i++) {
+                  fDataArr = fDataArr.concat(self.unzipFileData(filedata[i]));
+                }
+
+                fDataArr = util.sortObjArr(fDataArr, 'name');
+
+                filedata = [];
+                var urls = [];
+
+                for (i = 0; i < fDataArr.length; i++) {
+
+                  filedata.push(fDataArr[i].data);
+                  urls.push(imgFileObj.baseUrl + fDataArr[i].name);
+                }
+
+                vol.file = urls;
               }
 
-              fDataArr = util.sortObjArr(fDataArr, 'name');
+              try {
 
-              filedata = [];
-              var urls = [];
+                imgFileObj.dicomInfo = rendererjs.Renderer.parseDicom(filedata[0]);
 
-              for (i = 0; i < fDataArr.length; i++) {
+              } catch (err) {
 
-                filedata.push(fDataArr[i].data);
-                urls.push(imgFileObj.baseUrl + fDataArr[i].name);
+                console.log('Could not parse dicom ' + imgFileObj.baseUrl + ' Error - ' + err);
               }
-
-              vol.file = urls;
             }
 
-            try {
-
-              imgFileObj.dicomInfo = rendererjs.Renderer.parseDicom(filedata[0]);
-
-            } catch (err) {
-
-              console.log('Could not parse dicom ' + imgFileObj.baseUrl + ' Error - ' + err);
-            }
+            vol.filedata = filedata;
+            callback();
           }
+        });
+      }
 
-          vol.filedata = filedata;
-          callback();
-        }
-      });
-    }
+      // read all neuroimage files in imgFileObj.files
+      for (var i = 0; i < imgFileObj.files.length; i++) {
 
-    // read all neuroimage files in imgFileObj.files
-    for (var i = 0; i < imgFileObj.files.length; i++) {
-
-      readFile(imgFileObj.files[i], i);
-    }
-  };
+        readFile(imgFileObj.files[i], i);
+      }
+    };
 
     /**
      * Read a local or remote JSON file.
@@ -851,48 +858,48 @@ define(['text!rendererwin', 'utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'l
      * @param {Function} callback whose argument is the file data.
      */
     rendererjs.Renderer.prototype.readFile = function(file, readingMethod, callback) {
-    var self = this;
+      var self = this;
 
-    var reader = new FileReader();
+      var reader = new FileReader();
 
-    reader.onload = function() {
-      callback(reader.result);
-    };
+      reader.onload = function() {
+        callback(reader.result);
+      };
 
-    if (file.remote) {
+      if (file.remote) {
 
-      // the file is in a remote storage
-      if (file.cloudId) {
+        // the file is in a remote storage
+        if (file.cloudId) {
 
-        // the file is in the cloud
-        if (self.fileManager) {
+          // the file is in the cloud
+          if (self.fileManager) {
 
-          // reading files from the cloud was enabled
-          self.fileManager.getFileBlob(file.cloudId, function(blob) {
+            // reading files from the cloud was enabled
+            self.fileManager.getFileBlob(file.cloudId, function(blob) {
 
-            reader[readingMethod](blob);
-          });
+              reader[readingMethod](blob);
+            });
+
+          } else {
+
+            console.error('No file manager found. Reading files from cloud was not enabled');
+          }
 
         } else {
 
-          console.error('No file manager found. Reading files from cloud was not enabled');
+          // the file is in a remote backend
+          util.urlToBlob(file.url, function(blob) {
+
+            reader[readingMethod](blob);
+          });
         }
 
       } else {
 
-        // the file is in a remote backend
-        util.urlToBlob(file.url, function(blob) {
-
-          reader[readingMethod](blob);
-        });
+        // read the file locally
+        reader[readingMethod](file);
       }
-
-    } else {
-
-      // read the file locally
-      reader[readingMethod](file);
-    }
-  };
+    };
 
     /**
      * Zip the contents of several files into a few zip file contents. Maximum size for
