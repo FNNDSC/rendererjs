@@ -28,7 +28,7 @@
 
 var ColorSpace = {Unkown: 0, Grayscale: 1, AdobeRGB: 2, RGB: 3, CYMK: 4};
 var JpegImage = (function jpegImage() {
-  'use strict';
+  "use strict";
   var dctZigZag = new Int32Array([
     0,
     1, 8,
@@ -117,7 +117,7 @@ var JpegImage = (function jpegImage() {
       if (bitsData == 0xFF) {
         var nextByte = data[offset++];
         if (nextByte) {
-          throw 'unexpected marker: ' + ((bitsData << 8) | nextByte).toString(16);
+          throw "unexpected marker: " + ((bitsData << 8) | nextByte).toString(16);
         }
         // unstuff 0
       }
@@ -133,7 +133,7 @@ var JpegImage = (function jpegImage() {
         if (typeof node === 'number')
           return node;
         if (typeof node !== 'object')
-          throw 'invalid huffman sequence';
+          throw "invalid huffman sequence";
       }
       return null;
     }
@@ -233,7 +233,7 @@ var JpegImage = (function jpegImage() {
               }
             } else {
               if (s !== 1)
-                throw 'invalid ACn encoding';
+                throw "invalid ACn encoding";
               successiveACNextValue = receiveAndExtend(s);
               successiveACState = r ? 2 : 3;
             }
@@ -344,7 +344,7 @@ var JpegImage = (function jpegImage() {
       bitsCount = 0;
       marker = (data[offset] << 8) | data[offset + 1];
       if (marker <= 0xFF00) {
-        throw 'marker was not found';
+        throw "marker was not found";
       }
 
       if (marker >= 0xFFD0 && marker <= 0xFFD7) { // RSTx
@@ -544,14 +544,14 @@ var JpegImage = (function jpegImage() {
 
   constructor.prototype = {
     load: function load(path) {
-      var handleData = (function(data) {
+      var handleData = (function (data) {
         this.parse(data);
         if (this.onload)
           this.onload();
       }).bind(this);
 
-      if (path.indexOf('data:') > -1) {
-        var offset = path.indexOf('base64,') + 7;
+      if (path.indexOf("data:") > -1) {
+        var offset = path.indexOf("base64,") + 7;
         var data = atob(path.substring(offset));
         var arr = new Uint8Array(data.length);
         for (var i = data.length - 1; i >= 0; i--) {
@@ -560,9 +560,9 @@ var JpegImage = (function jpegImage() {
         handleData(data);
       } else {
         var xhr = new XMLHttpRequest();
-        xhr.open('GET', path, true);
-        xhr.responseType = 'arraybuffer';
-        xhr.onload = (function() {
+        xhr.open("GET", path, true);
+        xhr.responseType = "arraybuffer";
+        xhr.onload = (function () {
           // TODO catch parse error
           var data = new Uint8Array(xhr.response);
           handleData(data);
@@ -613,7 +613,7 @@ var JpegImage = (function jpegImage() {
       var huffmanTablesAC = [], huffmanTablesDC = [];
       var fileMarker = readUint16();
       if (fileMarker != 0xFFD8) { // SOI (Start of Image)
-        throw 'SOI not found';
+        throw "SOI not found";
       }
 
       fileMarker = readUint16();
@@ -684,7 +684,7 @@ var JpegImage = (function jpegImage() {
                   tableData[zz] = readUint16();
                 }
               } else
-                throw 'DQT: invalid table spec';
+                throw "DQT: invalid table spec";
               quantizationTables[quantizationTableSpec & 15] = tableData;
             }
             break;
@@ -693,7 +693,7 @@ var JpegImage = (function jpegImage() {
           case 0xFFC1: // SOF1 (Start of Frame, Extended DCT)
           case 0xFFC2: // SOF2 (Start of Frame, Progressive DCT)
             if (frame) {
-              throw 'Only single frame JPEGs supported';
+              throw "Only single frame JPEGs supported";
             }
             readUint16(); // skip data length
             frame = {};
@@ -732,7 +732,7 @@ var JpegImage = (function jpegImage() {
 
           case 0xFFC4: // DHT (Define Huffman Tables)
             var huffmanLength = readUint16();
-            for (i = 2; i < huffmanLength;) {
+            for (i = 2; i < huffmanLength; ) {
               var huffmanTableSpec = data[offset++];
               var codeLengths = new Uint8Array(16);
               var codeLengthSum = 0;
@@ -783,7 +783,7 @@ var JpegImage = (function jpegImage() {
               offset -= 3;
               break;
             }
-            throw 'unknown JPEG marker ' + fileMarker.toString(16);
+            throw "unknown JPEG marker " + fileMarker.toString(16);
         }
         fileMarker = readUint16();
       }
@@ -793,7 +793,8 @@ var JpegImage = (function jpegImage() {
       this.jfif = jfif;
       this.adobe = adobe;
       this.components = [];
-      switch (frame.components.length) {
+      switch (frame.components.length)
+      {
         case 1:
           this.colorspace = ColorSpace.Grayscale;
           break;
