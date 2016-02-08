@@ -1,5 +1,5 @@
 require(['./config'], function() {
-  require(['rendererjsPackage', 'fmjs', 'jquery', 'jquery_ui'], function(renderer, fm, $) {
+  require(['rendererjsPackage', 'fmjsPackage', 'jquery', 'jquery_ui'], function(renderer, fm, $) {
   // Entry point
 
   // Create a file manager object (optional)
