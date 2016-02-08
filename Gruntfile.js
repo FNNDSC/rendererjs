@@ -64,7 +64,8 @@ module.exports = function(grunt) {
 
     jasmine: { // run tests
       test: {
-        //src: '<%= jshint.source.src %>', this line must be commented when using the define function within the specs files
+        // comment when using the define function within the specs files
+        //src: '<%= jshint.source.src %>',
         options: {
           debug: true,
           host: 'http://localhost:8000/',
@@ -85,14 +86,6 @@ module.exports = function(grunt) {
       compile: {
         options: {
           baseUrl: '.',
-          include: 'src/main.js',
-          mainConfigFile: 'src/main.js',
-          out: 'dist/<%= pkg.name %>.min.js'
-        }
-      },
-      yo :{
-        options: {
-          baseUrl: '.',
           include: 'dist/<%= pkg.name %>/src/main.js',
           mainConfigFile: 'dist/<%= pkg.name %>/src/main.js',
           out: 'dist/<%= pkg.name %>.min.js'
@@ -109,23 +102,15 @@ module.exports = function(grunt) {
     },
 
     copy: {
-      components: { // copy requiered bower components which were not concatenated
-        files: [
-          {expand: true,
-            cwd: '<%= componentsDir %>',
-            src: ['requirejs/require.js', 'jquery/dist/jquery.min.js',
-              'jquery-ui/jquery-ui.min.js', 'jquery-ui/themes/smoothness/**'],
-            dest: 'dist/js/components'}]
-      },
-      yo: { // copy requiered bower components which were not concatenated
+      components: {
         files: [
           {
             expand: true,
             cwd: '<%= componentsDir %>',
             src: ['**/*'],
-            dest: 'dist/'}
-            ,
-            {
+            dest: 'dist/'
+          },
+          {
             expand: true,
             src: 'src/**/*',
             dest: 'dist/<%= pkg.name %>/'}]
@@ -151,6 +136,9 @@ module.exports = function(grunt) {
       dev: {
         bsFiles: {
           src: [
+              'demo/**/*.js',
+              'demo/**/*.css',
+              'demo/**/*.html',
               'src/**/*.js',
               'src/**/*.css',
               'src/**/*.html'
@@ -166,7 +154,7 @@ module.exports = function(grunt) {
           startPath: '/demo'
         }
       }
-    },
+    }
 
   });
 
@@ -196,12 +184,15 @@ module.exports = function(grunt) {
     ]);
   });
   // Test task.
-  grunt.registerTask('test', ['jscs', 'jshint', 'connect', 'jasmine']);
+  grunt.registerTask('test',
+    ['jscs', 'jshint', 'connect', 'jasmine']);
+
   // Build task.
-  //grunt.registerTask('build', ['cssmin', 'jscs', 'jshint', 'connect', 'jasmine', 'requirejs', 'copy']);
-    grunt.registerTask('build', ['copy:yo', 'requirejs:yo']);
+  grunt.registerTask('build',
+    ['cssmin', 'jscs', 'jshint', 'connect', 'jasmine', 'copy', 'requirejs']);
 
   // Default task.
-  grunt.registerTask('default', ['build']);
+  grunt.registerTask('default',
+    ['build']);
 
 };

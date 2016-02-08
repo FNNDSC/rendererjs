@@ -3,7 +3,7 @@
  *
  */
 
-define(['rendererjsPackage'], function(rendererjs) {
+define(['rendererjsPackage', 'jquery'], function(rendererjs, $) {
 
   describe('rendererjs', function() {
     var r;

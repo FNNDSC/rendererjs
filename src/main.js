@@ -1,18 +1,27 @@
-define(function(require) {
+var dependencies = [
+/**
+//
+// NEEDS JQUERY AND JQUERY UI 
+/// LOADED @ APP LEVEL
+//
+*/
 
-  // bower deps
-  var jquery = require('../../jquery/dist/jquery.min');
-  var jqueryUI = require('../../jquery-ui/jquery-ui.min');
-  var dicomParser = require('../../dicomParser/dist/dicomParser.min');
-  var util = require('../../utiljs/src/js/utiljs');
-  var jszip = require('../../jszip/dist/jszip');
+// bower
+'../../utiljs/src/js/utiljs',
+'../../jszip/dist/jszip',
+'../../dicomParser/dist/dicomParser',
 
-  // local deps
-  var rendererwin = require('../../text/text!./templates/rendererwin.html');
-  var xtk = require('./js/lib/xtk');
-  var jpegmin = require('./js/lib/jpegmin');
-  var lossless = require('./js/lib/lossless');
-  var jpx = require('./js/lib/jpx');
+//local
+'../../text/text!./templates/rendererwin.html',
+// Not AMD Modules
+'./js/lib/xtk',
+'./js/lib/jpegmin',
+'./js/lib/lossless',
+'./js/lib/jpx'
+
+];
+
+define(dependencies,function(util, jszip, dicomParser, rendererwin) {
 
   /**
    * Provide a namespace for the renderer module
@@ -213,11 +222,9 @@ define(function(require) {
   rendererjs.Renderer.prototype.initInfoWindow = function() {
     var self = this;
 
-    var infoWin = $('<div></div>');
-    self.infoWin = infoWin;
-
+    self.infoWin = $('<div></div>');
     // convert the previous div into a floating window with a close button
-    infoWin.dialog({
+    self.infoWin.dialog({
       title: 'Volume info',
       modal: true,
       autoOpen: false,
@@ -228,7 +235,7 @@ define(function(require) {
     });
 
     // add the HTML contents to the floating window
-    infoWin.append('<div class="view-renderer-infowin">No MRI meta information was provided.</div>');
+    self.infoWin.append('<div class="view-renderer-infowin">No MRI meta information was provided.</div>');
   };
 
   /**
