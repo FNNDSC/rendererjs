@@ -689,15 +689,18 @@ define(['text!rendererwin', 'utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'l
     rendererjs.Renderer.prototype._destroyRenderer = function() {
       var r = this.renderer;
 
-      r.remove(this.volume);
-      r.interactor.removeEventListener(X.event.events.SCROLL, this.onRenderer2DScroll);
-      r.interactor.removeEventListener(X.event.events.ZOOM, this.onRenderer2DZoom);
-      r.interactor.removeEventListener(X.event.events.PAN, this.onRenderer2DPan);
-      r.interactor.removeEventListener(X.event.events.ROTATE, this.onRenderer2DRotate);
-      r.interactor.removeEventListener('flipColumns', this.onRenderer2DFlipColumns);
-      r.interactor.removeEventListener('flipRows', this.onRenderer2DFlipRows);
-      r.removeEventListener('onPoint', this.onRenderer2DPoint);
-      r.destroy();
+      if (r) {
+
+        r.remove(this.volume);
+        r.interactor.removeEventListener(X.event.events.SCROLL, this.onRenderer2DScroll);
+        r.interactor.removeEventListener(X.event.events.ZOOM, this.onRenderer2DZoom);
+        r.interactor.removeEventListener(X.event.events.PAN, this.onRenderer2DPan);
+        r.interactor.removeEventListener(X.event.events.ROTATE, this.onRenderer2DRotate);
+        r.interactor.removeEventListener('flipColumns', this.onRenderer2DFlipColumns);
+        r.interactor.removeEventListener('flipRows', this.onRenderer2DFlipRows);
+        r.removeEventListener('onPoint', this.onRenderer2DPoint);
+        r.destroy();
+      }
 
       this.renderer = null;
     };
@@ -711,7 +714,7 @@ define(['text!rendererwin', 'utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'l
       this._destroyRenderer();
 
       // destroy XTK volume
-      this.volume.destroy();
+      if (this.volume) { this.volume.destroy(); }
 
       // remove html
       this.container.empty();
