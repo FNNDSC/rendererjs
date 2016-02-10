@@ -50,10 +50,25 @@ module.exports = function(grunt) {
       }
     },
 
+    connect: {
+      test: {
+        options: {
+          hostname: 'localhost',
+          port: 8101,
+          base: [
+            '.',
+            'src/js/components/mri_testdata'
+          ]
+        }
+      }
+    },
+
     jasmine: { // run tests
       test: {
         //src: '<%= jshint.source.src %>', this line must be commented when using the define function within the specs files
         options: {
+          host: 'http://<%= connect.test.options.hostname %>:<%= connect.test.options.port %>/',
+          src: '<%= jshint.source.src %>',
           specs: '<%= jshint.test.src %>',
           template: require('grunt-template-jasmine-requirejs'),
           templateOptions: {
@@ -137,6 +152,7 @@ module.exports = function(grunt) {
   });
 
   // These plugins provide necessary tasks.
+  grunt.loadNpmTasks('grunt-contrib-connect');
   grunt.loadNpmTasks('grunt-contrib-cssmin');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-jasmine');
@@ -161,9 +177,9 @@ module.exports = function(grunt) {
     ]);
   });
   // Test task.
-  grunt.registerTask('test', ['jscs', 'jshint', 'jasmine']);
+  grunt.registerTask('test', ['connect', 'jscs', 'jshint', 'jasmine']);
   // Build task.
-  grunt.registerTask('build', ['cssmin', 'jscs', 'jshint', 'jasmine', 'requirejs', 'copy']);
+  grunt.registerTask('build', ['cssmin', 'test', 'requirejs', 'copy']);
   // Default task.
   grunt.registerTask('default', ['build']);
 
