@@ -11,9 +11,9 @@ define(['rendererjs'], function(rendererjs) {
 
     // Image file object
     var imgFileObj = {
-      baseUrl: 'volumes/nii/volumes/nii/s34654_df.nii',
+      baseUrl: 'volumes/nii/',
       imgType: 'vol',
-      files: [{'url': 'volumes/nii/s34654_df.nii', 'remote': true}],
+      files: [{url: 'volumes/nii/s34654_df.nii', name: 's34654_df.nii', remote: true}],
       json: {'url': 'json/s34654_df.json', 'remote': true}
     };
 
@@ -30,21 +30,12 @@ define(['rendererjs'], function(rendererjs) {
       orientation: 'Z'
     };
 
-    var createRenderer = function() {
-
-      // append container for the xtk renderer
-      container.append('<div id="xtkrenderercont"></div>');
-
-      r = new rendererjs.Renderer(options);
-
-      r.imgFileObj = imgFileObj;
-    };
-
     describe('rendererjs initialization', function() {
 
       beforeEach(function() {
 
-        createRenderer();
+        r = new rendererjs.Renderer(options);
+        r.imgFileObj = imgFileObj;
       });
 
       afterEach(function() {
@@ -60,15 +51,14 @@ define(['rendererjs'], function(rendererjs) {
           r.createUI();
 
           expect(r.container.hasClass('view-renderer')).toEqual(true);
-        }
-      );
 
-      it('rendererjs.Renderer.prototype.createRenderer() creates internal 2D XTK renderer',
+          // renderer window has a title bar
+          expect(r.container.find('.view-renderer-titlebar').length).toEqual(1);
 
-        function() {
-
-          r.createRenderer();
-          expect(r.renderer.classname).toEqual('renderer2D');
+          // renderer window has a content
+          var contentDiv = r.container.find('.view-renderer-content');
+          expect(contentDiv.length).toEqual(1);
+          expect(contentDiv.attr('id')).toEqual(r.rendererId);
         }
       );
 
@@ -81,7 +71,17 @@ define(['rendererjs'], function(rendererjs) {
         }
       );
 
-      it('rendererjs.Renderer.prototype.readVolumeFiles() reads the volume file',
+      it('rendererjs.Renderer.prototype.createRenderer() creates internal 2D XTK renderer',
+
+        function() {
+
+          r.createUI();
+          r.createRenderer();
+          expect(r.renderer.classname).toEqual('renderer2D');
+        }
+      );
+
+      it('rendererjs.Renderer.prototype.readVolumeFiles() reads the image volume',
 
         function(done) {
 
@@ -90,13 +90,13 @@ define(['rendererjs'], function(rendererjs) {
           r.readVolumeFiles(function() {
 
             //expect(r.volume.filedata).toEqual(window.jasmine.any(Object));
-            expect(r.volume.filedata.length).toBeGreaterThan(0);
+            expect(r.volume.filedata.byteLength).toBeGreaterThan(0);
             done();
           });
         }
       );
 
-      /*it('rendererjs.Renderer.prototype.renderVolume() renders the volume file',
+      it('rendererjs.Renderer.prototype.renderVolume() renders the volume file',
 
         function(done) {
 
@@ -108,21 +108,24 @@ define(['rendererjs'], function(rendererjs) {
 
             r.renderVolume(function() {
 
-              expect(r.volume.filedata).toEqual(window.jasmine.any(Object));
+              expect(r.error).toBeFalsy();
               done();
             });
           });
         }
-      );*/
+      );
     });
 
     describe('rendererjs behaviour', function() {
 
-      beforeEach(function() {
+      beforeEach(function(done) {
 
-        createRenderer();
-        //r.createRenderer();
-        //r.createVolume();
+        r = new rendererjs.Renderer(options);
+
+        r.init(imgFileObj, function() {
+
+          done();
+        });
       });
 
       afterEach(function() {
@@ -146,6 +149,18 @@ define(['rendererjs'], function(rendererjs) {
           r.readJSONFile({'url': 'json/s34654_df.json', 'remote': true}, function(data) {
 
             expect(data.PatientName).toEqual('Bob');
+            done();
+          });
+        }
+      );
+
+      it('rendererjs.Renderer.prototype.readFile reads a file',
+
+        function(done) {
+
+          r.readFile({'url': 'volumes/nii/s34654_df.nii', 'remote': true}, 'readAsArrayBuffer', function(data) {
+
+            expect(data.byteLength).toBeGreaterThan(0);
             done();
           });
         }
