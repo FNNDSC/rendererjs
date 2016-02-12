@@ -469,6 +469,8 @@ define(['text!rendererwin', 'utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'l
       var r = self.renderer;
       var vol = self.volume;
 
+      // the onShowtime event handler gets executed after all files were fully loaded and
+      // just before the first rendering attempt
       r.afterRender = function() {
 
         if (vol.status === 'INVALID') {
@@ -487,9 +489,6 @@ define(['text!rendererwin', 'utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'l
             if (callback) { callback(); }
           });
         }
-
-        self.renderedOnce = true;
-
         r.afterRender = function() {};
       };
 
@@ -622,6 +621,7 @@ define(['text!rendererwin', 'utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'l
      */
     rendererjs.Renderer.prototype.getThumbnail = function(callback) {
       var self = this;
+      var r = self.renderer;
 
       var getThumbnail = function() {
 
@@ -633,7 +633,18 @@ define(['text!rendererwin', 'utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'l
         });
       };
 
-      // thumbnail can be generated only after the first rendering has happened
+      //
+      // thumbnail can be generated only after the first rendering has happen
+      //
+      r.afterRender = function() {
+
+        if (!self.renderedOnce) {
+
+          self.renderedOnce = true;
+          getThumbnail();
+        }
+      };
+
       if (self.renderedOnce) {
 
         getThumbnail();
@@ -641,7 +652,8 @@ define(['text!rendererwin', 'utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'l
       } else {
 
         // start a rendering
-        self.renderVolume(getThumbnail);
+        r.render();
+        util.documentRepaint();
       }
     };
 
