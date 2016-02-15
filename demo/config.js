@@ -15,6 +15,7 @@ require.config({
   {
     name: 'rendererjsPackage', // used for mapping...
     location: 'src',   // relative to base url
+    'main': 'js/rendererjs'
   }
   ]
 });

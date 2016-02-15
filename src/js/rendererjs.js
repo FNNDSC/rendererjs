@@ -1,23 +1,23 @@
 var dependencies = [
 /**
 //
-// NEEDS JQUERY AND JQUERY UI 
+// NEEDS JQUERY AND JQUERY UI
 /// LOADED @ APP LEVEL
 //
 */
 
 // bower
-'../../utiljs/src/js/utiljs',
-'../../jszip/dist/jszip',
-'../../dicomParser/dist/dicomParser',
+'../../../utiljs/src/js/utiljs',
+'../../../jszip/dist/jszip',
+'../../../dicomParser/dist/dicomParser',
 
 //local
-'../../text/text!./templates/rendererwin.html',
+'../../../text/text!../templates/rendererwin.html',
 // Not AMD Modules
-'./js/lib/xtk',
-'./js/lib/jpegmin',
-'./js/lib/lossless',
-'./js/lib/jpx'
+'./lib/xtk',
+'./lib/jpegmin',
+'./lib/lossless',
+'./lib/jpx'
 
 ];
 
