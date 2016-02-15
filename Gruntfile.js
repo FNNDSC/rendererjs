@@ -53,7 +53,7 @@ module.exports = function(grunt) {
     connect: {
       test: {
         options: {
-          port: 8000,
+          port: 8001,
           base: [
             '.',
             'bower_components'
@@ -67,8 +67,8 @@ module.exports = function(grunt) {
         // comment when using the define function within the specs files
         //src: '<%= jshint.source.src %>',
         options: {
-          debug: true,
-          host: 'http://localhost:8000/',
+          host: 'http://<%= connect.test.options.hostname %>:<%= connect.test.options.port %>/',
+          src: '<%= jshint.source.src %>',
           specs: '<%= jshint.test.src %>',
           template: require('grunt-template-jasmine-requirejs'),
           templateOptions: {
@@ -159,6 +159,7 @@ module.exports = function(grunt) {
   });
 
   // These plugins provide necessary tasks.
+  grunt.loadNpmTasks('grunt-contrib-connect');
   grunt.loadNpmTasks('grunt-contrib-cssmin');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-jasmine');
@@ -184,12 +185,14 @@ module.exports = function(grunt) {
     ]);
   });
   // Test task.
-  grunt.registerTask('test',
-    ['jscs', 'jshint', 'connect', 'jasmine']);
 
   // Build task.
   grunt.registerTask('build',
     ['cssmin', 'jscs', 'jshint', 'connect', 'jasmine', 'copy', 'requirejs']);
+
+  grunt.registerTask('test', ['connect', 'jscs', 'jshint', 'jasmine']);
+  // Build task.
+  //grunt.registerTask('build', ['cssmin', 'test', 'requirejs', 'copy']);
 
   // Default task.
   grunt.registerTask('default',

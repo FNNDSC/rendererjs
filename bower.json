@@ -23,6 +23,9 @@
     "test",
     "tests"
   ],
+  "devDependencies": {
+  "mri_testdata": "https://github.com/FNNDSC/mri_testdata.git#master"
+  },
   "dependencies": {
     "jquery": "~2.1.3",
     "jquery-ui": "~1.11.2",
