@@ -1,27 +1,19 @@
-var dependencies = [
-/**
-//
-// NEEDS JQUERY AND JQUERY UI
-/// LOADED @ APP LEVEL
-//
-*/
+define(
+  [
+  // bower
+  '../../../utiljs/src/js/utiljs',
+  '../../../jszip/dist/jszip',
+  '../../../dicomParser/dist/dicomParser',
 
-// bower
-'../../../utiljs/src/js/utiljs',
-'../../../jszip/dist/jszip',
-'../../../dicomParser/dist/dicomParser',
+  //local
+  '../../../text/text!../templates/rendererwin.html',
+  // Not AMD Modules
+  './lib/xtk',
+  './lib/jpegmin',
+  './lib/lossless',
+  './lib/jpx'
 
-//local
-'../../../text/text!../templates/rendererwin.html',
-// Not AMD Modules
-'./lib/xtk',
-'./lib/jpegmin',
-'./lib/lossless',
-'./lib/jpx'
-
-];
-
-define(dependencies,function(util, jszip, dicomParser, rendererwin) {
+  ],function(util, jszip, dicomParser, rendererwin) {
 
   /**
    * Provide a namespace for the renderer module
