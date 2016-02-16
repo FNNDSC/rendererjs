@@ -1,11 +1,19 @@
-/**
- * This module implements a renderer window
- */
+define(
+  [
+  // bower
+  '../../../utiljs/src/js/utiljs',
+  '../../../jszip/dist/jszip',
+  '../../../dicomParser/dist/dicomParser',
 
-// define a new module
-define(['text!rendererwin', 'utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'lossless',
+  //local
+  '../../../text/text!../templates/rendererwin.html',
+  // Not AMD Modules
+  './lib/xtk',
+  './lib/jpegmin',
+  './lib/lossless',
+  './lib/jpx'
 
-  'xtk', 'dicomParser'], function(rendererwin, util, jszip) {
+  ],function(util, jszip, dicomParser, rendererwin) {
 
     /**
      * Provide a namespace for the renderer module
@@ -532,90 +540,90 @@ define(['text!rendererwin', 'utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'l
      * @param {Function} optional callback to be called when the UI is ready.
      */
     rendererjs.Renderer.prototype.setUIMriInfo = function(callback) {
-      var self = this;
+    var self = this;
 
-      var imgFileObj = self.imgFileObj;
-      var vol = self.volume;
+    var imgFileObj = self.imgFileObj;
+    var vol = self.volume;
 
-      function setHTMLInfo() {
+    function setHTMLInfo() {
 
-        var info = self.mriInfo;
-        var jqR = self.container;
-        var age = '', orient = '', direct = '';
+      var info = self.mriInfo;
+      var jqR = self.container;
+      var age = '', orient = '', direct = '';
 
-        if (info.patientAge) {
-          age =  'AGE: ' + info.patientAge + '<br>';
-        }
-
-        $('.view-renderer-info-topleft', jqR).html(
-          info.patientName + '<br>' +
-          info.patientId + '<br>' +
-          'BIRTHDATE: ' + info.patientBirthDate + '<br>' +
-          age +
-          'SEX: ' + info.patientSex
-        );
-
-        $('.view-renderer-info-topright', jqR).html(
-          'SERIES: ' + info.seriesDescription + '<br>' +
-          info.manufacturer + '<br>' +
-          info.studyDate + '<br>' +
-          info.dimensions + '<br>' +
-          info.voxelSizes
-        );
-
-        if (info.orientation) {
-          orient = info.orientation + '<br>';
-        }
-
-        if (info.primarySliceDirection) {
-          direct = info.primarySliceDirection;
-        }
-
-        $('.view-renderer-info-bottomright', jqR).html(
-          orient + direct
-        );
-
-        self.updateUISliceInfo();
-
-        if (info.metaHTML) {
-
-          $('.view-renderer-infowin', self.infoWin).html(info.metaHTML);
-        }
-
-        // UI is ready
-        if (callback) { callback(); }
+      if (info.patientAge) {
+        age =  'AGE: ' + info.patientAge + '<br>';
       }
 
-      if (imgFileObj.json) {
+      $('.view-renderer-info-topleft', jqR).html(
+        info.patientName + '<br>' +
+        info.patientId + '<br>' +
+        'BIRTHDATE: ' + info.patientBirthDate + '<br>' +
+        age +
+        'SEX: ' + info.patientSex
+      );
 
-        // if there is a json file then read it
-        self.readJSONFile(imgFileObj.json, function(jsonObj) {
+      $('.view-renderer-info-topright', jqR).html(
+        'SERIES: ' + info.seriesDescription + '<br>' +
+        info.manufacturer + '<br>' +
+        info.studyDate + '<br>' +
+        info.dimensions + '<br>' +
+        info.voxelSizes
+      );
 
-          self.parseJSONData(jsonObj);
+      if (info.orientation) {
+        orient = info.orientation + '<br>';
+      }
 
-          setHTMLInfo();
-        });
+      if (info.primarySliceDirection) {
+        direct = info.primarySliceDirection;
+      }
 
-      } else if (imgFileObj.dicomInfo) {
+      $('.view-renderer-info-bottomright', jqR).html(
+        orient + direct
+      );
 
-        // if instead there is dicom information then use it
-        self.mriInfo = imgFileObj.dicomInfo;
+      self.updateUISliceInfo();
 
-        self.mriInfo.dimensions = (vol.range[0]) + ' x ' + (vol.range[1]) + ' x ' + (vol.range[2]);
-        self.mriInfo.voxelSizes = vol.spacing[0].toPrecision(4) + ', ' + vol.spacing[1].toPrecision(4) +
-        ', ' + vol.spacing[2].toPrecision(4);
+      if (info.metaHTML) {
+
+        $('.view-renderer-infowin', self.infoWin).html(info.metaHTML);
+      }
+
+      // UI is ready
+      if (callback) { callback(); }
+    }
+
+    if (imgFileObj.json) {
+
+      // if there is a json file then read it
+      self.readJSONFile(imgFileObj.json, function(jsonObj) {
+
+        self.parseJSONData(jsonObj);
 
         setHTMLInfo();
+      });
 
-      } else {
+    } else if (imgFileObj.dicomInfo) {
 
-        // just display slice number
-        self.updateUISliceInfo();
+      // if instead there is dicom information then use it
+      self.mriInfo = imgFileObj.dicomInfo;
 
-        // UI is ready
-        if (callback) { callback(); }
-      }
-    };
+      self.mriInfo.dimensions = (vol.range[0]) + ' x ' + (vol.range[1]) + ' x ' + (vol.range[2]);
+      self.mriInfo.voxelSizes = vol.spacing[0].toPrecision(4) + ', ' + vol.spacing[1].toPrecision(4) +
+      ', ' + vol.spacing[2].toPrecision(4);
+
+      setHTMLInfo();
+
+    } else {
+
+      // just display slice number
+      self.updateUISliceInfo();
+
+      // UI is ready
+      if (callback) { callback(); }
+    }
+  };
 
     /**
      * Generate a thumbnail's image data from a snapshot of the internal canvas.
@@ -623,39 +631,42 @@ define(['text!rendererwin', 'utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'l
      * @param {Function} callback whose argument is the thumbnail's image data.
      */
     rendererjs.Renderer.prototype.getThumbnail = function(callback) {
-      var self = this;
-      var r = self.renderer;
+    var self = this;
+    var r = self.renderer;
 
-      var getThumbnail = function() {
+    var getThumbnail = function() {
 
-        var canvas = $('canvas', self.container)[0];
+      var canvas = $('canvas', self.container)[0];
 
-        self.readFile(util.dataURItoJPGBlob(canvas.toDataURL('image/jpeg')), 'readAsDataURL', function(thData) {
+      self.readFile(util.dataURItoJPGBlob(canvas.toDataURL('image/jpeg')), 'readAsDataURL', function(thData) {
 
-          callback(thData);
-        });
-      };
+        callback(thData);
+      });
+    };
 
-      //
-      // thumbnail can be generated only after the first rendering has happen
-      //
-      r.afterRender = function() {
+    //
+    // thumbnail can be generated only after the first rendering has happen
+    //
+    r.afterRender = function() {
+
+      if (!self.renderedOnce) {
 
         self.renderedOnce = true;
         getThumbnail();
-      };
-
-      if (self.renderedOnce) {
-
-        getThumbnail();
-
-      } else {
-
-        // start a rendering
-        r.render();
-        util.documentRepaint();
       }
     };
+
+    if (self.renderedOnce) {
+
+      getThumbnail();
+
+    } else {
+
+      // start a rendering
+      r.render();
+      util.documentRepaint();
+    }
+  };
 
     /**
      * Change renderer's orientation.

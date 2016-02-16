@@ -1,35 +1,5 @@
-require.config({
-  baseUrl: 'js/components',
-  paths: {
-    // The left side is the module ID, the right side is the path to the file relative
-    // to baseUrl (which is in turn relative to the directory of this config script).
-    // Also, the path should NOT include the '.js' file extension.
-    // This example tries to load jQuery from Google's CDN first and if failure then falls
-    // back to the local jQuery at jquery/dist/jquery.min.js relative to the baseUrl.
-    //
-    // All JS modules are needed in development mode. However the only modules needed after
-    // building are jquery, jquery_ui and minimized renderjs.
-
-    jquery: ['https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min', 'jquery/dist/jquery.min'],
-    jquery_ui: ['https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min', 'jquery-ui/jquery-ui.min'],
-    gapi: 'https://apis.google.com/js/api',
-    text: 'text/text',
-    jszip: 'jszip/dist/jszip',
-    dicomParser: 'dicomParser/dist/dicomParser.min',
-    xtk: '../lib/xtk',
-    jpegmin: '../lib/jpegmin',
-    lossless: '../lib/lossless',
-    jpx: '../lib/jpx',
-    utiljs: 'utiljs/src/js/utiljs',
-    fmjs: 'fmjs/src/js/fmjs',
-    rendererwin: '../../templates/rendererwin.html',
-    rendererjs: '../rendererjs'
-  }
-});
-
-
-require(['rendererjs', 'fmjs'], function(renderer, fm) {
-
+require(['./config'], function() {
+  require(['rendererjsPackage', 'fmjsPackage', 'jquery', 'jquery_ui'], function(renderer, fm, $) {
   // Entry point
 
   // Create a file manager object (optional)
@@ -42,7 +12,6 @@ require(['rendererjs', 'fmjs'], function(renderer, fm) {
     rendererId: 'renderercontent',
     orientation: 'Z'
   };
-
 
   // Event handler for the directory loader button
   var dirBtn = document.getElementById('dirbtn');
@@ -65,7 +34,7 @@ require(['rendererjs', 'fmjs'], function(renderer, fm) {
     var r = new renderer.Renderer(options, driveFm);
 
     // overwrite event handler for the renderer's close button
-    r.onRendererClose = function () {
+    r.onRendererClose = function() {
 
       destroyRenderer(r);
     };
@@ -78,7 +47,7 @@ require(['rendererjs', 'fmjs'], function(renderer, fm) {
 
       } else {
 
-        r.getThumbnail( function(thData) {
+        r.getThumbnail(function(thData) {
 
           $('#thumbnail').css('display', 'block');
           $('img').attr('src', thData);
@@ -88,7 +57,7 @@ require(['rendererjs', 'fmjs'], function(renderer, fm) {
 
     // Image file object
     var imgFileObj = {
-      baseUrl: "/",
+      baseUrl: '/',
       files: []
     };
 
@@ -97,7 +66,7 @@ require(['rendererjs', 'fmjs'], function(renderer, fm) {
       imgFileObj.baseUrl = files[0].webkitRelativePath;
     }
 
-    for (var i=0; i<files.length; i++) {
+    for (var i = 0; i < files.length; i++) {
 
       if (renderer.Renderer.imgType(files[i]) === 'vol' || renderer.Renderer.imgType(files[i]) === 'dicom' ||
         renderer.Renderer.imgType(files[i]) === 'dicomzip') {
@@ -115,7 +84,7 @@ require(['rendererjs', 'fmjs'], function(renderer, fm) {
           imgFileObj.files.push(files[i]);
 
           // also grab the first JSON file with MRI information if there is any
-          for (i=0; i<files.length; i++) {
+          for (i = 0; i < files.length; i++) {
 
             if (renderer.Renderer.imgType(files[i]) === 'json') {
               imgFileObj.json = files[i];
@@ -132,4 +101,5 @@ require(['rendererjs', 'fmjs'], function(renderer, fm) {
     }
   };
 
+});
 });

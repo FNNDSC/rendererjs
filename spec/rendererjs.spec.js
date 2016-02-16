@@ -3,7 +3,7 @@
  *
  */
 
-define(['rendererjs'], function(rendererjs) {
+define(['rendererjsPackage', 'jquery', 'jquery_ui'], function(rendererjs, $) {
 
   describe('rendererjs', function() {
 
@@ -13,8 +13,8 @@ define(['rendererjs'], function(rendererjs) {
     var imgFileObj = {
       baseUrl: 'volumes/nii/',
       imgType: 'vol',
-      files: [{url: 'volumes/nii/s34654_df.nii', name: 's34654_df.nii', remote: true}],
-      json: {'url': 'json/s34654_df.json', name: 's34654_df.json', 'remote': true}
+      files: [{url: 'mri_testdata/volumes/nii/s34654_df.nii', name: 's34654_df.nii', remote: true}],
+      json: {'url': 'mri_testdata/json/s34654_df.json', name: 's34654_df.json', 'remote': true}
     };
 
     // append a container for the whole renderer
