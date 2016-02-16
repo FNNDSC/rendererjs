@@ -473,6 +473,8 @@ define(['text!rendererwin', 'utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'l
       // just before the first rendering attempt
       r.afterRender = function() {
 
+        self.renderedOnce = true;
+
         if (vol.status === 'INVALID') {
 
           // there were XTK errors while parsing the volume
@@ -489,6 +491,7 @@ define(['text!rendererwin', 'utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'l
             if (callback) { callback(); }
           });
         }
+
         r.afterRender = function() {};
       };
 
@@ -638,11 +641,8 @@ define(['text!rendererwin', 'utiljs', 'jszip', 'jquery_ui', 'jpegmin', 'jpx', 'l
       //
       r.afterRender = function() {
 
-        if (!self.renderedOnce) {
-
-          self.renderedOnce = true;
-          getThumbnail();
-        }
+        self.renderedOnce = true;
+        getThumbnail();
       };
 
       if (self.renderedOnce) {
