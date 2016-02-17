@@ -5,6 +5,7 @@ node_js:
 before_script:
   - npm install -g grunt-cli
   - npm install -g bower
+  - bower install
 script: grunt
 notifications:
   slack: fnndsc:dh6hxtgRA9tO8oUcbzpySF2r
