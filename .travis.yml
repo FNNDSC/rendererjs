@@ -1,0 +1,10 @@
+
+language: node_js
+node_js:
+  - "5.4"
+before_script:
+  - npm install -g grunt-cli
+  - npm install -g bower
+script: grunt
+notifications:
+  slack: fnndsc:dh6hxtgRA9tO8oUcbzpySF2r
