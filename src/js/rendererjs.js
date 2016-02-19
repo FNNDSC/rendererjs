@@ -1,14 +1,14 @@
 define(
   [
   // bower components
-  'jszip',
-  'dicomParser',
-  'utiljsPackage',
+  '../../../jszip/dist/jszip',
+  '../../../dicomParser/dist/dicomParser',
+  '../../../utiljs/src/js/utiljs',
 
-  // local relative paths
-  // AMD modules
-  'text!../templates/rendererwin.html',
-  // non-AMD modules
+  // html templates (requires the 'text' bower component)
+  '../../../text/text!../templates/rendererwin.html',
+
+  // relative paths to local non-AMD modules
   './lib/xtk',
   './lib/jpegmin',
   './lib/lossless',
