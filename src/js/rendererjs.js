@@ -1,19 +1,23 @@
 define(
   [
-  // bower
-  '../../../utiljs/src/js/utiljs',
-  '../../../jszip/dist/jszip',
-  '../../../dicomParser/dist/dicomParser',
+  // bower components
+  'jszip',
+  'dicomParser',
+  'utiljsPackage',
 
-  //local
-  '../../../text/text!../templates/rendererwin.html',
-  // Not AMD Modules
+  // local relative paths
+  // AMD modules
+  'text!../templates/rendererwin.html',
+  // non-AMD modules
   './lib/xtk',
   './lib/jpegmin',
   './lib/lossless',
-  './lib/jpx'
+  './lib/jpx',
 
-  ],function(util, jszip, dicomParser, rendererwin) {
+  // jquery is special because it is AMD but doesn't return an object
+  'jquery_ui'
+
+  ], function(jszip, dicomParser, util, rendererwin) {
 
     /**
      * Provide a namespace for the renderer module

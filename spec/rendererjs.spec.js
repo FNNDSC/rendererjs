@@ -3,18 +3,20 @@
  *
  */
 
-define(['rendererjsPackage', 'jquery', 'jquery_ui'], function(rendererjs, $) {
+define(['rendererjsPackage'], function(rendererjs) {
 
   describe('rendererjs', function() {
 
     window.jasmine.DEFAULT_TIMEOUT_INTERVAL = 20000;
 
+    var testDataDir = 'bower_components/mri_testdata/';
+
     // Image file object
     var imgFileObj = {
-      baseUrl: 'volumes/nii/',
+      baseUrl: testDataDir + 'volumes/nii/',
       imgType: 'vol',
-      files: [{url: 'mri_testdata/volumes/nii/s34654_df.nii', name: 's34654_df.nii', remote: true}],
-      json: {'url': 'mri_testdata/json/s34654_df.json', name: 's34654_df.json', 'remote': true}
+      files: [{url: testDataDir + 'volumes/nii/s34654_df.nii', name: 's34654_df.nii', remote: true}],
+      json: {'url': testDataDir + 'json/s34654_df.json', name: 's34654_df.json', 'remote': true}
     };
 
     // append a container for the whole renderer
