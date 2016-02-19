@@ -151,9 +151,6 @@ module.exports = function(grunt) {
         options: {
           watchTask: true,
           // serve base dir
-          // AND
-          // bower_components
-          // AT SAME LEVEL
           server: ['.'],
           startPath: '/demo'
         }
@@ -178,6 +175,7 @@ module.exports = function(grunt) {
   grunt.registerTask('serve', function(/*target*/) {
 
     grunt.task.run([
+      'copy:module',
       'browserSync:dev',
       'watch'
     ]);
