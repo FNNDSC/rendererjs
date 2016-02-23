@@ -3,7 +3,7 @@
  *
  */
 
-define(['rendererjsPackage'], function(rendererjs) {
+define(['rendererjs'], function(rendererjs) {
 
   describe('rendererjs', function() {
 

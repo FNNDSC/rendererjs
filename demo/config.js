@@ -11,13 +11,13 @@ require.config({
   packages: [
 
     {
-      name: 'rendererjsPackage', // used for mapping...
+      name: 'rendererjs', // used for mapping...
       location: './', // relative to base url
       main: 'rendererjs/src/js/rendererjs'
     },
 
     {
-      name: 'fmjsPackage',
+      name: 'fmjs',
       location: 'fmjs/src',
       main: 'js/fmjs'
     },
