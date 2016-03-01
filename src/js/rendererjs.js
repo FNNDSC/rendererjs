@@ -32,7 +32,6 @@ define(
      * @constructor
      * @param {Object} renderer options object with properties:
      *  -container: renderer's container's DOM id or renderer's container's DOM object
-     *  -rendererId: a DOM id for the XTK renderer object
      *  -orientation: renderer's orientation, either of the strings: 'X', 'Y' or 'Z'
      * @param {Object} optional file manager object to enable reading of files from the cloud or HTML5
      * sandboxed filesystem.
@@ -52,9 +51,6 @@ define(
         // a DOM object was passed
         this.container = $(options.container);
       }
-
-      // XTK renderer's container id
-      this.rendererId = options.rendererId;
 
       // renderer's orientation
       this.orientation = 'Z';
@@ -138,9 +134,6 @@ define(
      var template = $(rendererwin);
      self.container.append(template.filter('.view-renderer-titlebar'));
      self.container.append(template.filter('.view-renderer-content'));
-
-     // set content div's id
-     $('.view-renderer-content', self.container).attr('id', self.rendererId);
 
      // set title's bar caption
      $('.view-renderer-titlebar-title', self.container).text(url);
@@ -343,7 +336,7 @@ define(
 
       // create xtk object
       var r = new X.renderer2D();
-      r.container = self.rendererId;
+      r.container = $('.view-renderer-content', self.container)[0];
       r.bgColor = [0.2, 0.2, 0.2];
       r.orientation = self.orientation;
       r.init();

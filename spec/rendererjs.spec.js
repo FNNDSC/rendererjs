@@ -28,7 +28,6 @@ define(['rendererjs'], function(rendererjs) {
     // renderer options object
     var options = {
       container: container,
-      rendererId: 'xtkrenderercont',
       orientation: 'Z'
     };
 
@@ -60,7 +59,6 @@ define(['rendererjs'], function(rendererjs) {
           // renderer window has a content
           var contentDiv = r.container.find('.view-renderer-content');
           expect(contentDiv.length).toEqual(1);
-          expect(contentDiv.attr('id')).toEqual(r.rendererId);
         }
       );
 
