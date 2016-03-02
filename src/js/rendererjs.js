@@ -32,10 +32,9 @@ define(
      * @constructor
      * @param {Object} renderer options object with properties:
      *  -container: renderer's container's DOM id or renderer's container's DOM object
-     *  -rendererId: a DOM id for the XTK renderer object
-     *  -orientation: renderer's orientation, either of the strings: 'X', 'Y' or 'Z'
-     * @param {Object} optional file manager object to enable reading of files from the cloud or HTML5
-     * sandboxed filesystem.
+     *  -orientation: renderer's main orientation, either of the strings: 'X', 'Y' or 'Z'
+     * @param {Object} optional file manager object to enable reading of files from the
+     * cloud or from HTML5 sandboxed filesystem.
      */
     rendererjs.Renderer = function(options, fileManager) {
 
@@ -52,9 +51,6 @@ define(
         // a DOM object was passed
         this.container = $(options.container);
       }
-
-      // XTK renderer's container id
-      this.rendererId = options.rendererId;
 
       // renderer's orientation
       this.orientation = 'Z';
@@ -127,90 +123,87 @@ define(
      * Create and initialize the renderer's HTML UI.
      */
     rendererjs.Renderer.prototype.createUI = function() {
-     var self = this;
+      var self = this;
 
-     var url = self.imgFileObj.baseUrl + self.imgFileObj.files[0].name;
+      var url = self.imgFileObj.baseUrl + self.imgFileObj.files[0].name;
 
-     // add the appropriate classes to the renderer container
-     self.container.addClass('view-renderer');
+      // add the appropriate classes to the renderer container
+      self.container.addClass('view-renderer');
 
-     // append template html interface to the renderer's container
-     var template = $(rendererwin);
-     self.container.append(template.filter('.view-renderer-titlebar'));
-     self.container.append(template.filter('.view-renderer-content'));
+      // append template html interface to the renderer's container
+      var template = $(rendererwin);
+      self.container.append(template.filter('.view-renderer-titlebar'));
+      self.container.append(template.filter('.view-renderer-content'));
 
-     // set content div's id
-     $('.view-renderer-content', self.container).attr('id', self.rendererId);
+      // set title's bar caption
+      $('.view-renderer-titlebar-title', self.container).text(url);
 
-     // set title's bar caption
-     $('.view-renderer-titlebar-title', self.container).text(url);
+      // add the appropriate classes to the title bar elements
+      var jqButtons = $('button', self.container);
 
-     // add the appropriate classes to the title bar elements
-     var jqButtons = $('button', self.container);
+      jqButtons.addClass('ui-button ui-widget ui-state-default ui-corner-all');
+      $('span', jqButtons).addClass('ui-button-icon-primary ui-icon');
 
-     jqButtons.addClass('ui-button ui-widget ui-state-default ui-corner-all');
-     $('span', jqButtons).addClass('ui-button-icon-primary ui-icon');
+      jqButtons.mouseover(function() {
 
-     jqButtons.mouseover(function() {
+        return $(this).addClass('ui-state-hover');
 
-       return $(this).addClass('ui-state-hover');
+      }).mouseout(function() {
 
-     }).mouseout(function() {
+        return $(this).removeClass('ui-state-hover');
 
-       return $(this).removeClass('ui-state-hover');
+      }).focus(function() {
 
-     }).focus(function() {
+        return $(this).addClass('ui-state-focus');
 
-       return $(this).addClass('ui-state-focus');
+      }).blur(function() {
 
-     }).blur(function() {
+        return $(this).removeClass('ui-state-focus');
+      });
 
-       return $(this).removeClass('ui-state-focus');
-     });
+      // buttons' event handlers
+      jqButtons.click(function(evt) {
 
-     // buttons' event handlers
-     jqButtons.click(function(evt) {
+        var jqBtn = $(this);
 
-       var jqBtn = $(this);
+        if (jqBtn.hasClass('view-renderer-titlebar-buttonpane-close')) {
 
-       if (jqBtn.hasClass('view-renderer-titlebar-buttonpane-close')) {
+          self.onRendererClose(evt);
 
-         self.onRendererClose(evt);
+        } else if (jqBtn.hasClass('view-renderer-titlebar-buttonpane-maximize')) {
 
-       } else if (jqBtn.hasClass('view-renderer-titlebar-buttonpane-maximize')) {
+          if (self.maximized) {
 
-         if (self.maximized) {
+            self.restore();
 
-           self.restore();
+          } else {
 
-         } else {
+            self.maximize();
+          }
 
-           self.maximize();
-         }
+          self.onRendererChange(evt);
 
-         self.onRendererChange(evt);
+        } else if (jqBtn.hasClass('view-renderer-titlebar-buttonpane-pin')) {
 
-       } else if (jqBtn.hasClass('view-renderer-titlebar-buttonpane-pin')) {
+          if (self.selected) {
 
-         if (self.selected) {
+            self.deselect();
 
-           self.deselect();
+          } else {
 
-         } else {
+            self.select();
+          }
 
-           self.select();
-         }
+          self.onRendererChange(evt);
 
-         self.onRendererChange(evt);
+        } else if (jqBtn.hasClass('view-renderer-titlebar-buttonpane-info')) {
 
-       } else if (jqBtn.hasClass('view-renderer-titlebar-buttonpane-info')) {
+          self.infoWin.dialog('open');
+        }
+      });
 
-         self.infoWin.dialog('open');
-       }
-     });
-
-     self.initInfoWindow();
-   };
+      self.initInfoWindow();
+    };
 
     /**
      * Initilize Mail window's HTML and event handlers.
@@ -343,7 +336,7 @@ define(
 
       // create xtk object
       var r = new X.renderer2D();
-      r.container = self.rendererId;
+      r.container = $('.view-renderer-content', self.container)[0];
       r.bgColor = [0.2, 0.2, 0.2];
       r.orientation = self.orientation;
       r.init();

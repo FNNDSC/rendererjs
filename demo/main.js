@@ -10,7 +10,6 @@ require(['./config'], function() {
   // renderer options object
   var options = {
     container: document.getElementById('renderercontainer'),
-    rendererId: 'renderercontent',
     orientation: 'Z'
   };
 
