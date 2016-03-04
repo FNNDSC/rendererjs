@@ -250,6 +250,11 @@ define(
 
       util.documentRepaint();
       this.maximized = true;
+
+      if (!this.selected) {
+
+        this.select();
+      }
     };
 
     /**
